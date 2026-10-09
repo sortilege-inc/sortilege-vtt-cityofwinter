@@ -1049,3 +1049,12 @@ mark{ background:rgba(237,199,106,0.35); color:inherit; border-radius:2px; paddi
 .teachfold .rtext.teach{ margin-bottom:0.3rem; }
 details.readon{ margin:0 0 0.9rem 1.1rem; }
 details.readon .rtext.teach{ border-left:none; padding-left:0; margin:0.2rem 0 0; }
+
+/* the sidebar's control blocks, themed */
+.side-k{ color:var(--chalk-faint); }
+.session-card{ background:rgba(0,0,0,0.25); border-color:var(--edge); }
+.session-card.live{ border-color:rgba(159,191,122,0.5); }
+.session-code b{ color:var(--chalk); }
+.segmented.presets{ border-color:var(--edge); }
+.segmented.presets .btn{ border-right-color:var(--edge); }
+.segmented.presets .btn.on{ background:var(--slate); color:var(--ice); }

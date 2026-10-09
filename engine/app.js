@@ -116,6 +116,7 @@
       main.appendChild(mountSlot(null));
     }
     buildNav();
+    window.VttBus.emit('layout:rendered', null, { local: true });
   }
 
   function open(id) {
@@ -191,8 +192,9 @@
     if (!sc || !Session) return;
     sc.innerHTML = '';
     const s = Session.current();
+    sc.appendChild(el('div', { class: 'side-k' }, ['Session']));
     if (!s.active) {
-      const start = el('button', { class: 'btn ghost', type: 'button' }, ['Start session']);
+      const start = el('button', { class: 'btn', type: 'button' }, ['Start a session']);
       start.disabled = !s.configured;
       start.title = s.configured ? 'Players join by room code' : 'No Worker URL in engine/config.js';
       start.addEventListener('click', async () => {
@@ -205,15 +207,21 @@
         }
       });
       sc.appendChild(start);
+      sc.appendChild(el('div', { class: 'muted small side-note' }, [s.configured ? 'Players join by room code or link.' : 'No Worker configured.']));
       return;
     }
     const url = Session.joinUrl();
-    const copy = el('button', { class: 'btn ghost tiny', type: 'button', onclick: () => navigator.clipboard && navigator.clipboard.writeText(url).then(() => { copy.textContent = 'copied'; setTimeout(() => (copy.textContent = 'copy link'), 1500); }) }, ['copy link']);
-    const end = el('button', { class: 'btn ghost tiny', type: 'button', onclick: () => { if (confirm('End the session? Players are disconnected; your campaign stays here.')) Session.leave(); } }, ['end']);
-    const reseed = el('button', { class: 'btn ghost tiny', type: 'button', title: 'Replace the room\'s document with this browser\'s campaign (after restoring a pack)', onclick: () => { if (confirm('Overwrite the room with this browser\'s campaign?')) Session.reseed(); } }, ['reseed']);
-    sc.appendChild(el('div', { class: 'session-code' }, [el('span', { class: 'chip' + (s.connected ? ' on' : '') }, [s.connected ? 'live' : s.status]), el('b', {}, [s.info.code]), el('span', { class: 'muted' }, [` ${Object.keys(s.claims).length} claimed`])]));
-    sc.appendChild(el('div', { class: 'session-url' }, [url]));
-    sc.appendChild(el('div', { class: 'chiprow' }, [copy, reseed, end]));
+    const copy = el('button', { class: 'btn', type: 'button', title: url, onclick: () => navigator.clipboard && navigator.clipboard.writeText(url).then(() => { copy.textContent = 'Copied ✓'; setTimeout(() => (copy.textContent = 'Copy join link'), 1500); }) }, ['Copy join link']);
+    const end = el('button', { class: 'btn ghost tiny', type: 'button', onclick: () => { if (confirm('End the session? Players are disconnected; your campaign stays here.')) Session.leave(); } }, ['End session']);
+    const reseed = el('button', { class: 'btn ghost tiny', type: 'button', title: 'Replace the room\'s document with this browser\'s campaign (after restoring a pack)', onclick: () => { if (confirm('Overwrite the room with this browser\'s campaign?')) Session.reseed(); } }, ['Reseed']);
+    const seated = Object.keys(s.claims).length;
+    sc.appendChild(el('div', { class: 'session-card' + (s.connected ? ' live' : '') }, [
+      el('div', { class: 'session-status' }, [el('span', { class: 'dot' }), s.connected ? 'Live' : s.status === 'connecting' ? 'Connecting…' : 'Offline — reconnecting'] ),
+      el('div', { class: 'session-code' }, [el('span', { class: 'k' }, ['Room']), el('b', {}, [s.info.code])]),
+      el('div', { class: 'muted small' }, [`${seated} seated`]),
+      copy,
+      el('div', { class: 'chiprow session-acts' }, [reseed, end]),
+    ]));
     // how long the evening has run, the last thing rolled, and the room's idleness (rooms expire after 14 idle days)
     const elapsed = el('span', { class: 'muted session-clock', title: 'Since this session started' });
     const tick = () => {
@@ -251,21 +259,31 @@
   // the table and the player view are separate windows on the same state
   const wc = document.getElementById('window-controls');
   if (wc) {
+    wc.appendChild(el('div', { class: 'side-k' }, ['Windows']));
     wc.appendChild(el('button', { class: 'btn', type: 'button', onclick: () => window.open(CFG.pages.table, CFG.channel + '-table') }, ['Open table']));
     wc.appendChild(el('button', { class: 'btn ghost', type: 'button', onclick: () => window.open(CFG.pages.table + '?view=player', CFG.channel + '-player') }, ['Open player view']));
     // undo / redo of this page's own changes (Ctrl+Z / Ctrl+Shift+Z)
-    const undoBtn = el('button', { class: 'btn ghost tiny', type: 'button', title: 'Undo the last change made on this page (Ctrl+Z)', onclick: () => State.undo() }, ['Undo']);
-    const redoBtn = el('button', { class: 'btn ghost tiny', type: 'button', title: 'Redo (Ctrl+Shift+Z)', onclick: () => State.redo() }, ['Redo']);
+    const undoBtn = el('button', { class: 'btn ghost', type: 'button', title: 'Undo the last change made on this page (Ctrl+Z)', onclick: () => State.undo() }, ['↶ Undo']);
+    const redoBtn = el('button', { class: 'btn ghost', type: 'button', title: 'Redo (Ctrl+Shift+Z)', onclick: () => State.redo() }, ['↷ Redo']);
     const syncHistory = () => {
       const h = State.history();
       undoBtn.disabled = !h.undo;
       redoBtn.disabled = !h.redo;
-      undoBtn.textContent = h.undo ? `Undo (${h.undo})` : 'Undo';
+      undoBtn.textContent = h.undo ? `↶ Undo · ${h.undo}` : '↶ Undo';
     };
-    wc.appendChild(el('div', { class: 'chiprow history' }, [undoBtn, redoBtn]));
+    wc.appendChild(el('div', { class: 'pair history' }, [undoBtn, redoBtn]));
     // panel presets: what the three slots show (one click each)
     const PRESETS = CFG.presets || { Prep: ['tracker', 'scene', 'inspector'], Running: ['scene', 'party', 'log'] };   // a system's own (VttConfig.presets)
-    wc.appendChild(el('div', { class: 'chiprow presets' }, Object.keys(PRESETS).map((name) => el('button', { class: 'btn ghost tiny', type: 'button', title: PRESETS[name].map((id) => Panels.PANELS[id] ? Panels.PANELS[id].label : id).join(' · '), onclick: () => { const s = slots(); PRESETS[name].forEach((id, i) => (s[i] = id)); State.ui('slots', s); single = PRESETS[name][0]; render(); } }, [name]))));
+    const presetRow = el('div', { class: 'segmented presets', role: 'group', 'aria-label': 'Layouts' });
+    const syncPresets = () => {
+      const cur = slots();
+      presetRow.querySelectorAll('button').forEach((b) => b.classList.toggle('on', PRESETS[b.dataset.preset].every((id, i) => cur[i] === id)));
+    };
+    Object.keys(PRESETS).forEach((name) => presetRow.appendChild(el('button', { class: 'btn ghost tiny', type: 'button', 'data-preset': name, title: PRESETS[name].map((id) => Panels.PANELS[id] ? Panels.PANELS[id].label : id).join(' · '), onclick: () => { const s = slots(); PRESETS[name].forEach((id, i) => (s[i] = id)); State.ui('slots', s); single = PRESETS[name][0]; render(); syncPresets(); } }, [name])));
+    wc.appendChild(el('div', { class: 'side-k' }, ['Layouts']));
+    wc.appendChild(presetRow);
+    syncPresets();
+    window.VttBus.on('layout:rendered', syncPresets);   // the slot pickers change the layout too
     window.VttBus.on('history', syncHistory);
     syncHistory();
   }

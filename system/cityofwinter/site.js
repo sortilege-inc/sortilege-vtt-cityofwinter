@@ -14,8 +14,20 @@ window.VttSiteTabs = (function () {
       Panels.mount(body, id, ctx);
     },
   });
+  const rulesTab = {
+    id: 'rules', label: 'Rules', books: true,
+    render(main, path, ctx) {
+      const host = el('div', { class: 'site-pane site-pane-rules' });
+      main.appendChild(host);
+      window.CowReader.mount(host, {
+        mode: 'site', section: path && path[0],
+        href: (s) => ctx.href('rules', [s.slug]),
+        onNavigate: (s) => history.replaceState(null, '', ctx.href('rules', [s.slug])),   // the URL follows; no re-render
+      });
+    },
+  };
   return [
-    paneTab('rules', 'Rules', true),
+    rulesTab,
     paneTab('atlas', 'Atlas', true),
     paneTab('traditions', 'Traditions', true),
   ];

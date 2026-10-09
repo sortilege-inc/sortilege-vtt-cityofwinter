@@ -175,7 +175,62 @@ window.CowData = (function () {
     });
   }))));
 
-  const sections = byType('Rulebook Section').map((e) => ({ title: e.name.replace(/^Section: /, ''), page: propValue(e, 'Page') }));
+  const sections = byType('Rulebook Section').map((e) => ({ id: e.id, title: e.name.replace(/^Section: /, ''), page: propValue(e, 'Page') }));
+
+  // ── the book's outline: its sections in page order, each holding what the book prints there ──
+  // A section runs from its page to the next section's. A procedure, rule or lore chapter lands in
+  // the section its page falls in; a sidebar in the section of the entity it CONCERNS (or, failing
+  // that, at the end under "Sidebars"). Chapter heads are the sections that name a Phase. The
+  // numbered sections (1. Introduction … 8. Introduce the Umbra) show that step of the procedure
+  // their chapter holds. Nothing here is text of ours: titles, pages and bodies are the corpus's.
+  const slug = (s) => String(s).toLowerCase().replace(/^\d+\.\s*/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  let outlineCache = null;
+  function outline() {
+    if (outlineCache) return outlineCache;
+    const phases = new Set(all().map((e) => propValue(e, 'Phase')).filter(Boolean));
+    const secs = sections.slice().sort((a, b) => (a.page || 0) - (b.page || 0)).map((s, i, arr) => ({
+      id: s.id, title: s.title, slug: slug(s.title), page: s.page, end: (arr[i + 1] || {}).page || Infinity,
+      chapter: phases.has(s.title) || i === 0, numbered: /^\d+\.\s/.test(s.title), items: [],
+    }));
+    // a numbered section belongs to the chapter before it
+    secs.forEach((s, i) => { s.parent = s.numbered ? (secs.slice(0, i).reverse().find((x) => !x.numbered) || null) : null; });
+    const sectionAt = (page) => { let hit = null; secs.forEach((s) => { if (s.page != null && page != null && s.page <= page) hit = s; }); return hit; };
+    const place = (page, item) => { const s = sectionAt(page); if (s) s.items.push(item); return !!s; };
+    const extra = { title: 'Sidebars', slug: 'sidebars', page: null, end: null, chapter: true, numbered: false, items: [], parent: null, trailing: true };
+    procedures.forEach((p) => place(p.page, { kind: 'procedure', name: p.name, page: p.page, data: p, id: p.id }));
+    rules.forEach((r) => place(r.page, { kind: 'rule', name: r.name, page: r.page, data: r, id: r.id }));
+    optionalRules.forEach((r) => place(r.page, { kind: 'optional', name: r.name, page: r.page, data: r, id: r.id }));
+    soloModules.forEach((r) => place(r.page, { kind: 'solo', name: r.name, page: r.page, data: r, id: r.id }));
+    // the concept DEFs that carry a page (Session, Chapter, Token…) — the book's own definitions
+    all().filter((e) => e.form === 'DEF' && !e.type && propValue(e, 'Page') && e.desc).forEach((e) => place(propValue(e, 'Page'), { kind: 'concept', name: e.name, page: propValue(e, 'Page'), data: { text: e.desc }, id: e.id }));
+    lore.forEach((l) => { const s = secs.find((x) => x.title === l.title); if (s) s.items.push({ kind: 'lore', name: l.title, page: s.page, data: l, id: l.file }); });
+    guidance.forEach((g) => {
+      const pages = g.concerns.map((n) => named(n)).filter(Boolean).map((e) => propValue(e, 'Page')).filter(Boolean);
+      const item = { kind: 'sidebar', name: g.label.replace(/-/g, ' '), page: pages[0] || null, data: g, id: g.id };
+      if (pages.length && place(pages[0], item)) return;
+      // no page through what it concerns: a topic that names a section ("campaign advice", "solo play")
+      const byTopic = g.topics.map((t) => secs.find((s) => s.title.toLowerCase() === String(t).toLowerCase())).find(Boolean);
+      if (byTopic) { item.page = byTopic.page; byTopic.items.push(item); } else extra.items.push(item);
+    });
+    // a numbered setup section shows its step
+    secs.filter((s) => s.numbered && s.parent).forEach((s) => {
+      const proc = (s.parent.items.find((it) => it.kind === 'procedure') || {}).data;
+      const st = proc && proc.steps.find((x) => x.name === s.title.replace(/^\d+\.\s*/, ''));
+      if (st) s.items.push({ kind: 'step', name: st.name, page: s.page, data: st, proc, id: st.id });
+    });
+    secs.forEach((s) => s.items.sort((a, b) => (a.page || 0) - (b.page || 0)));
+    if (extra.items.length) secs.push(extra);
+    outlineCache = secs;
+    return secs;
+  }
+  // where a thing is in the book: { section, page } for a procedure, rule, section or step name
+  function locate(name) {
+    const secs = outline();
+    const bySection = secs.find((s) => s.title === name || s.title.replace(/^\d+\.\s*/, '') === name);
+    if (bySection) return { section: bySection, page: bySection.page };
+    for (const s of secs) { const it = s.items.find((i) => i.name === name); if (it) return { section: s, page: it.page || s.page, item: it }; }
+    return null;
+  }
   const lore = books().flatMap((b) => (b.lore || []).map((l) => ({
     file: l.file, title: (l.sections[0] && l.sections[0].title) || l.file,
     markdown: l.sections.map((s) => (s.title ? '#'.repeat(s.level || 1) + ' ' + s.title + '\n\n' : '') + s.paragraphs.join('\n\n')).join('\n\n'),
@@ -190,6 +245,6 @@ window.CowData = (function () {
     transitLines: F.transitLines, byLine, transitDistance: F.transitDistance, cityStartingOptions: F.cityStartingOptions,
     bondLists: F.bondLists, ageTiers: F.ageTiers, bondsAtOrBelow, cityBondsAtOrBelow, memoryBonds, bondJoiner, openPromptWord, tierForMarks, palette,
     procedures, byProcedure, proc, step, option, substep, rules, byRule, rule, optionalRules, optional, soloModules, askFate, fateProc,
-    concept, guidance, guidanceText, hooks, sections, lore, loreByTitle, themes,
+    concept, guidance, guidanceText, hooks, sections, lore, loreByTitle, themes, outline, locate, slug,
   };
 })();

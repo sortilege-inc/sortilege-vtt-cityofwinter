@@ -926,3 +926,88 @@ body.play.mode-sheet .play-main{ max-width:1400px; }
 /* beside the map (Map + sheet) the sheet pane is narrow: the table stacks, rail below */
 body.play.mode-split .playtable{ grid-template-columns:1fr; }
 body.play.mode-split .playrail{ order:2; }
+
+/* =============================================================== the reader */
+.reader{ display:flex; flex-direction:column; gap:0.6rem; min-width:0; }
+.reader-top{ display:flex; gap:0.5rem; align-items:center; }
+.reader-top .search{ flex:1; min-width:0; }
+.reader-body{ display:grid; grid-template-columns:minmax(0,1fr); gap:1rem; align-items:start; }
+.reader-site .reader-body{ grid-template-columns:260px minmax(0,1fr); }
+.reader-site .tocbtn{ display:none; }
+.reader-panel .reader-toc{ display:none; }
+.reader-panel.toc-open .reader-toc{ display:block; }
+.reader-site .reader-toc{ position:sticky; top:0.8rem; max-height:calc(100vh - 2rem); overflow:auto; }
+.reader-toc ol{ list-style:none; margin:0; padding:0; }
+.reader-toc li a{
+  display:flex; align-items:baseline; gap:0.5rem; padding:0.22rem 0.5rem; border-radius:4px; text-decoration:none;
+  font-family:var(--caps); font-variant:small-caps; letter-spacing:0.05em; font-size:0.98rem; color:var(--chalk-dim);
+}
+.reader-toc li.chapter a{ color:var(--chalk); font-size:1.08rem; margin-top:0.35rem; }
+.reader-toc li.numbered a{ padding-left:1.4rem; }
+.reader-toc li a:hover{ background:rgba(255,255,255,0.04); color:var(--chalk); }
+.reader-toc li.on a{ background:rgba(209,161,60,0.14); color:var(--gold-lit); }
+.reader-toc li a .nm{ flex:1; min-width:0; }
+.pg{ font-family:var(--serif); font-variant:normal; letter-spacing:0; font-size:0.78rem; color:var(--chalk-faint); white-space:nowrap; }
+.reader-head{ margin-bottom:0.6rem; padding-bottom:0.5rem; border-bottom:1px solid var(--edge-soft); }
+.reader-head h2{ display:flex; align-items:baseline; gap:0.7rem; margin:0.1rem 0 0; font-size:1.55rem; }
+.reader-page{ min-width:0; }
+.ritem{ margin:0 0 1.3rem; }
+.ritem h3{ display:flex; align-items:baseline; gap:0.6rem; margin:0.9rem 0 0.3rem; font-family:var(--disp); font-variant:normal; letter-spacing:0.01em; font-size:1.2rem; color:var(--chalk); }
+.ritem h3 .kind, .ritem .eyebrow{ font-family:var(--caps); font-variant:small-caps; letter-spacing:0.1em; font-size:0.78rem; color:var(--ice-deep); }
+.ritem-sidebar{ background:rgba(0,0,0,0.22); border:1px solid var(--edge-soft); border-left:3px solid var(--gold); border-radius:5px; padding:0.6rem 0.9rem 0.5rem; }
+.ritem-optional h3 .kind, .ritem-solo h3 .kind{ color:var(--amber); }
+.rstep{ margin:0.7rem 0 0.9rem 0; padding-left:0.9rem; border-left:2px solid var(--edge-soft); }
+.rstep.d1{ margin-left:0.6rem; border-left-color:transparent; }
+.rstep h4{ display:flex; align-items:center; gap:0.5rem; margin:0 0 0.25rem; font-size:1.02rem; color:var(--chalk); }
+.rstep h4 .n{ display:inline-grid; place-items:center; width:1.35rem; height:1.35rem; border-radius:50%; background:var(--night-4); color:var(--chalk-2); font-family:var(--serif); font-variant:normal; font-size:0.8rem; }
+.roptions{ display:grid; gap:0.5rem; margin:0.3rem 0 0.5rem; }
+.roption{ padding:0.4rem 0.7rem; border:1px solid var(--edge-soft); border-radius:5px; }
+.roption h5{ margin:0 0 0.2rem; font-family:var(--caps); font-variant:small-caps; letter-spacing:0.08em; font-size:0.95rem; color:var(--ice); }
+.reader-sub{ margin:0.4rem 0; padding-left:1.2rem; }
+.reader-sub li{ margin:0.25rem 0; }
+.reader-sub a{ color:var(--chalk-2); }
+.reader-foot{ display:flex; align-items:center; gap:0.5rem; margin-top:1.2rem; padding-top:0.6rem; border-top:1px solid var(--edge-soft); }
+.reader-hits{ list-style:none; margin:0; padding:0; display:grid; gap:0.4rem; }
+.reader-hits .hit{ display:block; width:100%; text-align:left; font:inherit; background:rgba(0,0,0,0.2); border:1px solid var(--edge-soft); border-radius:5px; padding:0.45rem 0.7rem; color:var(--chalk); }
+.reader-hits .hit:hover{ border-color:var(--ice-deep); background:rgba(0,0,0,0.32); }
+.reader-hits .where{ display:flex; align-items:baseline; gap:0.4rem; font-family:var(--caps); font-variant:small-caps; letter-spacing:0.05em; }
+.reader-hits .snip{ display:block; margin-top:0.2rem; font-size:0.92rem; color:var(--chalk-2); }
+mark{ background:rgba(237,199,106,0.35); color:inherit; border-radius:2px; padding:0 0.1em; }
+
+/* citing the book from the stage */
+.cite{
+  display:inline-flex; align-items:baseline; gap:0.4rem; align-self:flex-start; flex:none;
+  font-family:var(--caps); font-variant:small-caps; letter-spacing:0.07em; font-size:0.86rem; padding:0.12rem 0.6rem;
+  color:var(--ice-deep); background:transparent; border:1px solid var(--edge-soft); border-radius:99px;
+}
+.cite:hover{ color:var(--ice); border-color:var(--ice-deep); background:rgba(0,0,0,0.2); }
+.cite .pg{ color:inherit; opacity:0.8; }
+.stagehead .grow{ flex:1; min-width:0; }
+.setuphead-row{ display:flex; align-items:flex-start; gap:0.6rem; }
+.citerow{ margin-bottom:0.6rem; }
+.stage p.action{ margin:0.2rem 0 0.8rem; font-family:var(--caps); font-variant:small-caps; letter-spacing:0.08em; font-size:1.05rem; color:var(--gold-lit); }
+
+/* ============================================================== legibility */
+/* The uncial is for titles. Lists, nav, summaries and chips read in the serif small caps. */
+.navbtn, .site-tab, .slot-head, .holdtab .nm, .homecard .nm, .scenetile .sname, details.rule > summary{ font-family:var(--caps) !important; font-variant:small-caps; }
+.navbtn{ font-size:1.05rem; letter-spacing:0.06em; }
+.scenetile .sname{ font-variant:normal; font-family:var(--serif); }
+.homecard .nm{ font-family:var(--disp) !important; font-variant:normal; }
+.slot-body{ font-size:16px; }
+/* the stepper in a panel: numbers only, the current step named */
+.slot .stepper:not(.big) li:not(.on) .nm, .playtable .stepper:not(.big) li:not(.on) .nm{ display:none; }
+.slot .stepper:not(.big) li:not(.on), .playtable .stepper:not(.big) li:not(.on){ padding-right:0.25rem; }
+
+/* ===================================================================== phone */
+@media (max-width:640px){
+  .play-head{ padding:0.5rem 0.8rem; }
+  .play-head .brand-title{ font-size:1.3rem; }
+  .play-head .brand-sub{ display:none; }
+  .chronicle{ gap:0.4rem 0.8rem; }
+  .chronicle .cactions{ width:100%; }
+  .stagehead h2{ font-size:1.5rem; }
+  .reader-site .reader-body{ grid-template-columns:1fr; }
+  .reader-site .tocbtn{ display:inline-flex; }
+  .reader-site .reader-toc{ display:none; position:static; max-height:none; }
+  .reader-site.toc-open .reader-toc{ display:block; }
+}

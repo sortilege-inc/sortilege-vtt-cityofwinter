@@ -110,9 +110,10 @@ window.CowPanels = (function () {
       el('h4', {}, el('span', { class: 'n', text: n }), name, state === 'done' ? el('span', { class: 'tick', text: '✓' }) : null), kids);
   }
 
-  function stageHead(eyebrow, title, ch) {
+  function stageHead(eyebrow, title, ch, cite) {
     return el('header', { class: 'stagehead' }, ch ? tok(ch, { size: 'lg' }) : null,
-      el('div', {}, el('div', { class: 'eyebrow', text: eyebrow }), el('h2', { text: title })));
+      el('div', { class: 'grow' }, el('div', { class: 'eyebrow', text: eyebrow }), el('h2', { text: title })),
+      cite ? window.CowReader.cite(cite) : null);
   }
 
   /** The datalist of names a Bond may be with: the family, the side-characters, every Banner. */
@@ -137,7 +138,7 @@ window.CowPanels = (function () {
         el('span', { class: 'n', text: s.n }), el('span', { class: 'nm', text: s.name }))))));
     const step = steps[stage];
     const panel = el('div', { class: 'panel setupstep' });
-    add(panel, el('div', { class: 'eyebrow', text: `Step ${step.n} of ${steps.length}` }), el('h2', { text: step.name }));
+    add(panel, el('div', { class: 'setuphead-row' }, el('div', { class: 'grow' }, el('div', { class: 'eyebrow', text: `Step ${step.n} of ${steps.length}` }), el('h2', { text: step.name })), window.CowReader.cite(`${step.n}. ${step.name}`, step.name)));
     add(panel, [setupIntro, setupHome, setupNames, setupAge, setupBonds, setupHold, setupTokens, setupUmbra][stage](st, step));
     add(wrap, panel);
     return wrap;
@@ -448,18 +449,18 @@ window.CowPanels = (function () {
     const TS = 'Tradition Scene';
     if (ph === 'choose-scene') {
       const s1 = D.step(TS, 'Choose a Scene');
-      add(stage, stageHead(`${cur.name}’s turn · ${TS}`, s1.name, cur), stepper(TS, 1), instr(s1.instruction));
+      add(stage, stageHead(`${cur.name}’s turn · ${TS}`, s1.name, cur, TS), stepper(TS, 1), el('p', { class: 'action', text: 'Choose a Scene on the location →' }), instr(s1.instruction));
       const acts = el('div', { class: 'altacts' });
       if (R.regionOf(st, cur) === 'City') add(acts, travelBox(st, cur));
       add(acts, el('div', { class: 'alt' },
         el('button', { class: 'warm', text: 'Play a Migration Scene instead', disabled: !R.canPlayMigrationScene(cur), onclick: () => { ui.migrateScene = true; ui.carry = null; bump(); } }),
         el('div', { class: 'small muted', text: sentence(D.proc('Migration Scene').instruction, 'play a Migration Scene') })));
-      add(stage, acts, el('p', { class: 'small muted', text: 'Choose a Scene on the location.' }));
+      add(stage, acts);
       return stage;
     }
     if (ph === 'share-or-witness') {
       const s2 = D.step(TS, 'Share or witness?');
-      add(stage, stageHead(`${cur.name}’s turn · ${TS}`, st.turn.scene, cur), stepper(TS, 2), instr(s2.instruction),
+      add(stage, stageHead(`${cur.name}’s turn · ${TS}`, st.turn.scene, cur, TS), stepper(TS, 2), instr(s2.instruction),
         el('div', { class: 'options two' }, shareOption(st, cur, s2), witnessOption(st, cur, s2)),
         el('div', { class: 'btnrow' }, el('button', { class: 'ghost tiny', text: '← Choose a different Scene', onclick: () => commit('unchooseScene', { id: cur.id }) })));
       return stage;
@@ -469,14 +470,14 @@ window.CowPanels = (function () {
       const peek = R.peekPass(st);
       const wasMemory = st.turn.sceneKind === 'memory';
       const text = wasMemory ? D.step('Memory Scene', 'Pass the Turn').instruction : D.step(TS, 'End the Scene').instruction;
-      add(stage, stageHead(`${cur.name}’s turn · ${wasMemory ? 'Memory Scene' : TS}`, wasMemory ? 'Pass the Turn' : 'End the Scene', cur), stepper(wasMemory ? 'Memory Scene' : TS, 5), instr(text));
+      add(stage, stageHead(`${cur.name}’s turn · ${wasMemory ? 'Memory Scene' : TS}`, wasMemory ? 'Pass the Turn' : 'End the Scene', cur, wasMemory ? 'Memory Scene' : TS), stepper(wasMemory ? 'Memory Scene' : TS, 5));
       const btns = el('div', { class: 'btnrow' });
       if (peek) {
         add(btns, el('button', { class: 'primary big', onclick: () => commit('passTurn', {}) },
           peek.kind === 'turn' ? ['Pass the turn to ', tok(peek.c, { size: 'sm' }), ` ${peek.c.name}`]
             : peek.kind === 'migrate' ? (R.households(st).length > 1 ? `Pass the turn — ${peek.household.members.map((c) => c.name).join(' & ')} migrate` : 'Pass the turn — the family migrates') : 'Pass the turn'));
       }
-      add(stage, btns);
+      add(stage, btns, instr(text));
       if (st.variants['Solo Play']) {
         add(stage, el('h4', { text: 'Or act as another main character' }),
           pickChars(R.activeCharacters(st).filter((c) => c.id !== cur.id && !c.hadMigrationScene), null, (c) => commit('giveTurn', { id: c.id, text: `${cur.name} ends the scene; the story turns to ${c.name}.` })));
@@ -545,7 +546,7 @@ window.CowPanels = (function () {
     const TS = 'Tradition Scene';
     const s3 = D.step(TS, 'Lead the scene');
     const kind = st.turn.sceneKind;
-    add(stage, stageHead(`${cur.name}’s turn · ${TS}`, st.turn.scene, cur), stepper(TS, [3, 4]), el('h4', { text: s3.name }), instr(s3.instruction),
+    add(stage, stageHead(`${cur.name}’s turn · ${TS}`, st.turn.scene, cur, TS), stepper(TS, [3, 4]), el('h4', { text: s3.name }), instr(s3.instruction),
       details('Scene Advice', el('div', { class: 'lore', html: miniMarkdown(D.loreByTitle('Scene Advice').markdown.replace(/^# .*\n/, '')) })));
     const s4 = D.step(TS, 'Pass on the Tradition');
     add(stage, el('h4', { text: s4.name }), instr(s4.instruction));
@@ -599,7 +600,7 @@ window.CowPanels = (function () {
     const lim = R.handLimit(cur);
     if (!ui.carry) ui.carry = new Set(cur.hand.slice(0, lim));
     const over = cur.hand.length > lim;
-    add(stage, stageHead(`${cur.name}’s turn`, MS, cur), stepper(MS, [1, 2, 3]), details('What a Migration Scene is', instr(proc.instruction)),
+    add(stage, stageHead(`${cur.name}’s turn`, MS, cur, MS), stepper(MS, [1, 2, 3]), details('What a Migration Scene is', instr(proc.instruction)),
       stepBlock(1, proc.steps[0].name, '', instr(proc.steps[0].instruction)),
       stepBlock(2, proc.steps[1].name, '', instr(proc.steps[1].instruction),
         over ? el('div', {}, el('p', { class: 'small', text: `${cur.name} may carry ${lim} — carrying ${ui.carry.size}.` }),
@@ -626,7 +627,7 @@ window.CowPanels = (function () {
     const whole = !m.apart && R.households(st).length <= 1;
     const fromRegion = (D.byLocation.get(m.from || st.family.home) || {}).region;
     const gnames = group.map((c) => c.name).join(' & ');
-    add(stage, stageHead(m.apart || !whole ? `${gnames} · from ${locName(m.from)}` : 'The whole family', m.apart ? 'Migrate Apart' : MF),
+    add(stage, stageHead(m.apart || !whole ? `${gnames} · from ${locName(m.from)}` : 'The whole family', m.apart ? 'Migrate Apart' : MF, null, m.apart ? 'Migrate apart' : MF),
       stepper(MF, [!dest || (arrival && !m.entrance) ? 1 : cards.length ? (short.length ? 2 : 3) : 4]),
       m.apart ? el('div', { class: 'callout' }, el('h3', { text: 'Migrate apart' }), instr(D.rule('Migrate apart')), details('Living apart', instr(D.guidanceText('different-homes'))))
         : whole ? instr(proc.instruction) : el('div', {}, instr(proc.instruction), details('Living apart', instr(D.guidanceText('different-homes')))),
@@ -660,7 +661,7 @@ window.CowPanels = (function () {
     const companions = R.apartCompanions(st, c);
     if (!ui.apart || ui.apart.for !== c.id) ui.apart = { for: c.id, join: new Set() };
     const join = ui.apart.join;
-    add(stage, stageHead(`${c.name}’s turn · waiting to migrate`, 'Migrate Apart?', c), instr(MS.steps[2].instruction),
+    add(stage, stageHead(`${c.name}’s turn · waiting to migrate`, 'Migrate Apart?', c, 'Migrate apart'), instr(MS.steps[2].instruction),
       el('div', { class: 'callout' }, instr(D.rule('Migrate apart')), details('Living apart', instr(D.guidanceText('different-homes')))),
       el('div', { class: 'options two' },
         el('div', { class: 'option' }, el('h3', { text: 'Wait for the family' }), el('p', { class: 'small muted', text: `${c.name}’s turn passes to the next player.` }),
@@ -675,13 +676,13 @@ window.CowPanels = (function () {
 
   function cityArrivalStage(st, stage) {
     const P = D.proc('Migrating to the City');
-    add(stage, stageHead('The City of Winter', P.name), instr(P.instruction), P.steps.map((s) => stepBlock(s.n, s.name, 'done', instr(s.instruction))),
+    add(stage, stageHead('The City of Winter', P.name, null, P.name), instr(P.instruction), P.steps.map((s) => stepBlock(s.n, s.name, 'done', instr(s.instruction))),
       el('div', { class: 'btnrow' }, el('button', { class: 'primary big', text: 'Open the City Map', onclick: () => commit('openCityMap', {}) })));
     return stage;
   }
 
   function whoFirstStage(st, stage, text) {
-    add(stage, stageHead(locName(st.family.home), 'Who takes the first turn?'), instr(text),
+    add(stage, stageHead(locName(st.family.home), 'Who takes the first turn?', null, 'Migrate the Family'), instr(text),
       pickChars(R.activeCharacters(st), null, (c) => commit('giveTurn', { id: c.id, text: `${c.name} takes the first turn.` })));
     return stage;
   }
@@ -693,7 +694,7 @@ window.CowPanels = (function () {
     const ph = st.turn.phase;
     const targets = R.livingCharacters(st).filter((c) => c.id !== cur.id);
     if (ph === 'choose-scene') {
-      add(stage, stageHead(`${cur.name}’s turn · a Memory`, MS, cur), stepper(MS, 1), details('Playing a Memory', instr(proc.instruction)), instr(s1.instruction));
+      add(stage, stageHead(`${cur.name}’s turn · a Memory`, MS, cur, MS), stepper(MS, 1), details('Playing a Memory', instr(proc.instruction)), instr(s1.instruction));
       if (!targets.length) {
         add(stage, el('p', { class: 'muted', text: 'There is no living character whose token could be moved.' }), el('div', { class: 'btnrow' }, el('button', { class: 'primary', text: 'Pass the turn', onclick: () => commit('passTurn', {}) })));
         return stage;
@@ -705,7 +706,7 @@ window.CowPanels = (function () {
     }
     const target = chById(st.turn.memoryTarget);
     const played = st.table.find((t) => t.kind === 'memory');
-    add(stage, stageHead(`${cur.name}’s turn · a Memory`, st.turn.scene, cur), stepper(MS, played ? [3, 4] : 2),
+    add(stage, stageHead(`${cur.name}’s turn · a Memory`, st.turn.scene, cur, MS), stepper(MS, played ? [3, 4] : 2),
       stepBlock(2, s2.name, played ? 'done' : '', instr(s2.instruction),
         played ? el('div', { class: 'tablecards' }, el('div', { class: 'tslot' }, cardEl(card(played.cardId), { facedown: !played.revealed, onclick: () => commit('reveal', { cardId: played.cardId }) })))
           : el('div', { class: 'cardrow' }, cur.hand.map((id) => cardEl(card(id), { onclick: () => commit('memoryPlay', { id: cur.id, cardId: id }) })))),
@@ -727,7 +728,7 @@ window.CowPanels = (function () {
     const overs = living.filter((c) => c.hand.length > R.handLimit(c));
     const unders = living.filter((c) => c.hand.length < R.handLimit(c));
     const at = !allMarked ? 1 : overs.length || st.pool.length ? 3 : 4;
-    add(stage, stageHead(`Chapter ${st.family.chapter}`, EC), stepper(EC, at === 1 ? 1 : at === 3 ? [2, 3] : 4), instr(proc.instruction));
+    add(stage, stageHead(`Chapter ${st.family.chapter}`, EC, null, EC), stepper(EC, at === 1 ? 1 : at === 3 ? [2, 3] : 4), instr(proc.instruction));
     add(stage, stepBlock(1, s1.name, allMarked ? 'done' : '', instr(s1.instruction), inCity ? details('City Marks', instr(D.concept('City Marks'))) : null,
       el('div', { class: 'markrows' }, living.map((c) => {
         const done = ce.marked[c.id];
@@ -781,7 +782,7 @@ window.CowPanels = (function () {
     const allRolled = elders.every((c) => cs.rolled[c.id]);
     const boroughDue = !cs.continuing && st.borough.isHome;
     const boroughDone = !boroughDue || !!(cs.borough && cs.borough.station);
-    add(stage, stageHead(`Session ${st.family.session}`, cs.continuing && !cs.first ? `Chapter ${st.family.chapter} continues` : `Chapter ${st.family.chapter} begins`));
+    add(stage, stageHead(`Session ${st.family.session}`, cs.continuing && !cs.first ? `Chapter ${st.family.chapter} continues` : `Chapter ${st.family.chapter} begins`, null, cs.fromSession ? 'New Session Setup' : 'Starting a New Chapter'));
     if (cs.fromSession) {
       const NS = D.proc('New Session Setup');
       add(stage, el('div', { class: 'steps compact' }, NS.steps.map((s) => stepBlock(s.n, s.name, '', instr(s.instruction)))));
@@ -817,7 +818,7 @@ window.CowPanels = (function () {
 
   function sessionClosedStage(st, stage) {
     const reflect = D.step('Ending a Chapter', 'New Chapter or End the session?').options.find((o) => o.name === 'Closing Reflection');
-    add(stage, stageHead(`Session ${st.family.session}`, reflect.name), instr(reflect.instruction),
+    add(stage, stageHead(`Session ${st.family.session}`, reflect.name, null, 'Ending a Chapter'), instr(reflect.instruction),
       details('Ending a Campaign', instr(D.guidanceText('ending-a-campaign'))), details('Storing the game', instr(D.rule('Storing the Game'))),
       el('div', { class: 'btnrow' }, el('button', { class: 'primary big', text: `Begin Session ${st.family.session + 1}`, onclick: () => commit('newSession', {}) })),
       el('p', { class: 'small muted', text: st.family.chapterClosed ? `The next session begins Chapter ${st.family.chapter + 1}.` : `Chapter ${st.family.chapter} is still open; the next session continues it.` }));
@@ -887,7 +888,7 @@ window.CowPanels = (function () {
       const q = el('input', { placeholder: 'the question for Fate', class: 'wide' });
       const fields = D.askFate.map((o) => ({ o, input: el('textarea', { rows: 2, placeholder: o.definition }) }));
       const out = el('div', { class: 'fateout' });
-      return el('div', { class: 'fate' }, instr(AF.instruction),
+      return el('div', { class: 'fate' }, el('div', { class: 'citerow' }, window.CowReader.cite(AF.name)), instr(AF.instruction),
         stepBlock(1, s1.name, '', instr(s1.instruction), q),
         stepBlock(2, s2.name, '', instr(s2.instruction.split(/\n\s*\n/)[0]), el('div', { class: 'outcomes' }, fields.map(({ o, input }) => el('label', { class: 'outcome', dataset: { band: o.roll } }, el('span', { class: 'band', text: o.roll }), el('span', { class: 'oname', text: o.outcome }), input)))),
         stepBlock(3, s3.name, '', out, el('div', { class: 'btnrow' },
@@ -1048,33 +1049,13 @@ window.CowPanels = (function () {
 
   /* ============================================================ RULES & BOOKS == */
 
-  let rulesQ = '';
-  function renderRules(container) {
-    const q = el('input', { type: 'search', class: 'search', placeholder: 'Find a rule…', value: rulesQ });
-    const hits = el('div', { class: 'rules-list' });
-    const draw = () => {
-      clear(hits);
-      const t = rulesQ.trim().toLowerCase();
-      const groups = [
-        ['Procedures', D.procedures.map((p) => ({ id: p.id, name: p.name, text: [p.instruction, ...p.steps.map((s) => `${s.n}. ${s.name}\n\n${s.instruction || ''}\n\n${s.teaching || ''}\n\n${(s.options || []).map((o) => o.name + '\n\n' + o.instruction).join('\n\n')}\n\n${(s.substeps || []).map((x) => x.name + '\n\n' + (x.instruction || '') + '\n\n' + (x.teaching || '')).join('\n\n')}`)].join('\n\n') }))],
-        ['Rules', D.rules.map((r) => ({ id: r.id, name: r.name, text: r.text }))],
-        ['Optional rules', D.optionalRules.map((r) => ({ id: r.id, name: r.name, text: `${r.optionalText || ''}\n\n${r.text || ''}` }))],
-        ['Solo Play', D.soloModules.map((r) => ({ id: r.id, name: r.name, text: r.text }))],
-        ['Sidebars', D.guidance.map((g) => ({ id: g.id, name: g.label.replace(/-/g, ' '), text: g.text }))],
-      ];
-      let any = false;
-      for (const [label, items] of groups) {
-        const shown = items.filter((i) => !t || (i.name + '\n' + i.text).toLowerCase().includes(t));
-        if (!shown.length) continue;
-        any = true;
-        add(hits, el('h3', { text: label }), shown.map((i) => { const d = el('details', { class: 'rule', open: t.length >= 2 ? true : null }, el('summary', { text: i.name }), instr(i.text)); return d; }));
-      }
-      if (!any) add(hits, el('p', { class: 'muted', text: 'Nothing in the rules matches that.' }));
-    };
-    q.addEventListener('input', () => { rulesQ = q.value; draw(); });
-    draw();
-    container.focusSearch = () => q.focus();
-    return el('div', { class: 'rules-panel' }, q, hits);
+  // the reader (reader.js): the book in its own order; the stage cites into it
+  function renderRules(container, ctx) {
+    clear(container);
+    const host = el('div', { class: 'rules-panel' });
+    add(container, host);
+    const r = window.CowReader.mount(host, { mode: 'panel' });
+    ctx.on('cow:reader', (t) => { const s = D.outline().find((x) => x.slug === t.section || x.title === t.section); if (s) r.go(s, t.term); });
   }
 
   /* =================================================================== ATLAS == */
@@ -1192,7 +1173,7 @@ window.CowPanels = (function () {
   Panels.register('family', panel('The family', renderFamily));
   Panels.register('turn', panel('Turn & decks', renderTurn));
   Panels.register('record', panel('The record', renderRecord));
-  Panels.register('rules', { label: 'Rules & Books', render(container) { clear(container); const n = renderRules(container); add(container, n); } });
+  Panels.register('rules', { label: 'Rules & Books', render: renderRules });
   Panels.register('atlas', { label: 'Atlas', render(container) { clear(container); add(container, renderAtlas()); } });
   Panels.register('traditions', { label: 'Traditions', render(container) { clear(container); add(container, renderTraditions(container)); } });
   Panels.register('campaign', panel('The family’s table', renderCampaign));

@@ -42,11 +42,18 @@ window.VttLibrary = (function () {
     return Object.assign({ url: base() + '/' + r.key }, r);
   }
 
+  // the library's maps: everything that isn't a token's art (VttConfig.tokenArt — those are tokens, not maps)
+  const tokenArtUrls = () => new Set(Object.values(CFG.tokenArt || {}));
+  async function maps() {
+    const hidden = tokenArtUrls();
+    return (await list()).filter((r) => !hidden.has(r.url));
+  }
+
   async function remove(k) {
     if (!ready()) throw new Error('Enter the library key in Settings first.');
     const res = await fetch(base() + '/' + k, { method: 'DELETE', headers: headers() });
     if (!res.ok) throw new Error('Could not remove it (HTTP ' + res.status + ').');
   }
 
-  return { enabled, ready, key, setKey, list, upload, remove, base };
+  return { enabled, ready, key, setKey, list, maps, upload, remove, base };
 })();

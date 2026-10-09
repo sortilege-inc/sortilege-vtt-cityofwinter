@@ -1097,7 +1097,7 @@
     if (Lib && Lib.enabled() && !PLAYER) {
       const pickLib = el('select', { class: 'vtt-select' }, [el('option', { value: '' }, [Lib.ready() ? 'the library…' : 'the library (key in Settings)'])]);
       pickLib.disabled = !Lib.ready();
-      if (Lib.ready()) Lib.list().then((rows) => rows.forEach((r) => pickLib.appendChild(el('option', { value: r.url }, [r.name])))).catch((e) => { pickLib.appendChild(el('option', { value: '' }, [e.message])); });
+      if (Lib.ready()) (Lib.maps || Lib.list)().then((rows) => rows.forEach((r) => pickLib.appendChild(el('option', { value: r.url }, [r.name])))).catch((e) => { pickLib.appendChild(el('option', { value: '' }, [e.message])); });
       pickLib.addEventListener('change', () => {
         if (!pickLib.value) return;
         img.value = pickLib.value;

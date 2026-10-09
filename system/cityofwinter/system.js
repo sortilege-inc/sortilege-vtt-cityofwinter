@@ -107,7 +107,9 @@ window.VttSystem = (function () {
   const tokenColor = (t) => t.color || COLORS[t.kind] || COLORS.marker;
   const tokenPalette = () => R.TOKENS.map((t) => ({ name: t.name, color: t.color }));
   const ICONS = ['person', 'hood', 'helm', 'crown', 'mitre', 'hat', 'skull', 'wolf', 'crow', 'boar', 'hound', 'purse'];
-  const tokenIcons = () => ICONS.map((id) => ({ id, label: id[0].toUpperCase() + id.slice(1), image: 'assets/tokens/npc/' + id + '.svg' }));
+  // the box's discs first (VttConfig.tokenArt), then the family's generic figures
+  const tokenIcons = () => R.TOKENS.filter((t) => ((window.VttConfig || {}).tokenArt || {})[t.id]).map((t) => ({ id: t.id, label: t.name, image: window.VttConfig.tokenArt[t.id] }))
+    .concat(ICONS.map((id) => ({ id, label: id[0].toUpperCase() + id.slice(1), image: 'assets/tokens/npc/' + id + '.svg' })));
   function tokenStatus(t) {
     if (t.kind !== 'party') return null;
     const m = (S().party || []).find((x) => x.id === t.owner);

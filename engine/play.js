@@ -153,7 +153,7 @@
       el('p', {}, ['Your ' + (CFG.roleName || 'GM') + ' gave you a room code. Enter it to claim your character — or bring the one you made.']),
       el('div', { class: 'chiprow' }, [code, go]),
       msg,
-      characterLoader('made on the site’s character creator; it joins the party when you do'),
+      Sys.joinForm ? null : characterLoader('made on the site’s character creator; it joins the party when you do'),
       Session.configured() ? null : el('div', { class: 'muted' }, ['Sessions aren’t configured on this deployment yet.']),
     ]);
   }
@@ -169,7 +169,8 @@
     return el('div', { class: 'play-card' }, [
       el('h1', {}, ['Who are you?']),
       party.length ? el('div', { class: 'cards' }, cards) : el('p', { class: 'muted' }, [s.connected ? 'The ' + (CFG.roleName || 'GM') + ' hasn’t added any characters yet.' : 'Connecting…']),
-      characterLoader('made on the site’s character creator'),
+      Sys.joinForm ? Sys.joinForm(s) : null,   // a system that lets you add yourself to the party (City of Winter: the family)
+      Sys.joinForm ? null : characterLoader('made on the site’s character creator'),
     ]);
   }
 

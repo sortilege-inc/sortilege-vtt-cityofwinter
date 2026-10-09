@@ -18,6 +18,32 @@ window.VttSystem = (function () {
     return P.wholeTable(st, opts || {});
   }
 
+  // The claim screen's "add yourself": a player who isn't in the family yet names their
+  // character and takes the seat (addMember is a setup op anyone may send before claiming).
+  function joinForm(s) {
+    const { el, button } = window.VttRender;
+    const Session = window.VttSession;
+    if (!s || !s.connected) return null;
+    const name = el('input', { type: 'text', class: 'text', placeholder: 'your character’s name', autocomplete: 'off' });
+    const pron = el('input', { type: 'text', class: 'text', placeholder: 'pronouns (optional)', autocomplete: 'off' });
+    const msg = el('div', { class: 'muted' });
+    const go = button('Join the family', () => {
+      const n = name.value.trim();
+      if (!n) { name.focus(); return; }
+      if ((S().party || []).some((m) => m.name === n)) { msg.textContent = 'Someone in the family already has that name — claim them above, or choose another.'; return; }
+      const id = State.genId('ch');
+      State.commit('addMember', [{ id, name: n, pronouns: pron.value.trim(), templateId: (D.named('Main Character') || {}).id, at: Date.now(), who: null }]);
+      Session.claim(id);
+    }, '');
+    name.addEventListener('keydown', (e) => { if (e.key === 'Enter') go.click(); });
+    return el('div', { class: 'join-form' }, [
+      el('h2', {}, ['Or add yourself']),
+      el('p', { class: 'muted' }, ['Not in the family yet? Name your character; the rest of the notecard — Marks, Bonds, Traditions — is filled in at the table during First Session Setup.']),
+      el('div', { class: 'chiprow' }, [name, pron, go]),
+      msg,
+    ]);
+  }
+
   function memberSubtitle(m) {
     const bits = [];
     if (m.marks !== undefined) bits.push(`${D.tierForMarks(m.marks)} · ${m.marks} Mark${m.marks === 1 ? '' : 's'}`);
@@ -52,16 +78,19 @@ window.VttSystem = (function () {
   // ── the map table (engine/vtt.js) ────────────────────────────────
   // No maps ship with this VTT (D4): the facilitator may put any image on the table — the
   // library (M4) — and the party stand on it as tokens, each player's their own to move.
+  // One scene, "The table": the engine keys a map by its scene, and without one it would never
+  // commit the map to the shared state (found at M4: the image showed but never reached a player).
+  const TABLE = { id: 'table', name: 'The table', moduleId: null };
   const modules = () => [];
-  const scenes = () => [];
+  const scenes = () => [TABLE];
   const pages = () => [];
   const cast = () => [];
   const booksFor = () => ['rules', 'atlas', 'cards'];
   const playBooks = () => ['rules', 'atlas', 'cards'];
-  const currentSceneId = () => null;
+  const currentSceneId = () => TABLE.id;
   const maps = () => [];
   const mapDef = () => null;
-  const defaultMapId = (sceneId) => sceneId || 'table';
+  const defaultMapId = (sceneId) => sceneId || TABLE.id;
   const legend = () => null;
   const mapAssets = () => [];
   const sceneFigures = () => [];
@@ -91,5 +120,5 @@ window.VttSystem = (function () {
   const tokenMenu = () => null;
   const byId = (id) => D.entity(id);
 
-  return { liveSheet, memberSubtitle, readCharacter, downloadCharacter, rollLine, modules, scenes, pages, cast, booksFor, playBooks, currentSceneId, maps, mapDef, defaultMapId, legend, mapAssets, sceneFigures, placeTokens, portrait, tokenSources, tokenColor, tokenPalette, tokenIcons, tokenStatus, selectToken, tokenMenu, byId, MODULE_MAPS: {} };
+  return { liveSheet, joinForm, memberSubtitle, readCharacter, downloadCharacter, rollLine, modules, scenes, pages, cast, booksFor, playBooks, currentSceneId, maps, mapDef, defaultMapId, legend, mapAssets, sceneFigures, placeTokens, portrait, tokenSources, tokenColor, tokenPalette, tokenIcons, tokenStatus, selectToken, tokenMenu, byId, MODULE_MAPS: {} };
 })();

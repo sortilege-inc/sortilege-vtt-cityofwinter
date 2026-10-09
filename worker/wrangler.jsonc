@@ -8,6 +8,9 @@
     // The app's own origin — the only non-localhost origin the Worker answers to.
     "ALLOWED_ORIGIN": "https://cityofwinter.sortilege.online,https://sortilege-inc.github.io"
   },
+  // the map library (PLAN.md, D4): `wrangler kv namespace create LIBRARY`; the upload key is the
+  // secret LIBRARY_KEY (`wrangler secret put LIBRARY_KEY`; locally, worker/.dev.vars)
+  "kv_namespaces": [{ "binding": "LIBRARY", "id": "321651f1c568451f8e64572ecfa1d44d" }],
   "durable_objects": {
     "bindings": [{ "name": "SESSION_ROOM", "class_name": "SessionRoom" }]
   },

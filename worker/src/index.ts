@@ -1,8 +1,18 @@
-// sortilege-vtt-cityofwinter Worker: the session rooms.
+// sortilege-vtt-cityofwinter Worker: the session rooms, and the map library.
 //
 //   POST /session                  create a room → { code, gmToken }
 //   GET  /session/:code            { exists }
 //   GET  /session/:code/ws?token=  WebSocket into the room
+//   GET  /library                  the library's images (X-Library-Key)
+//   PUT  /library/:name            upload an image (X-Library-Key) → { key, name, size, type, uploaded }
+//   GET  /library/:key             the image itself (public: the key carries a random part)
+//   DELETE /library/:key           remove it (X-Library-Key)
+//
+// City of Winter has no GM: the one who starts the room holds the 'gm' token (the
+// facilitator) and every seated player may send every game op — the rules are the system's
+// (system/cityofwinter/ops.js, bundled here so the room applies the same ops the browser does).
+// The library (PLAN.md, D4) is a KV namespace: nothing in the repo, one library per deployment,
+// the upload key a Worker secret (LIBRARY_KEY) the facilitator enters once in Settings.
 //
 // A SessionRoom is one Durable Object per room code. It holds the campaign's shared
 // document (whatever engine/ops.js declares shared) in SQLite, applies ops with the
@@ -12,11 +22,19 @@
 import { DurableObject } from 'cloudflare:workers';
 // @ts-ignore — plain JS, UMD; esbuild bundles it
 import Ops from '../../engine/ops.js';
+// @ts-ignore — the game's ops register themselves on the same Ops (UMD, requires engine/ops.js)
+import '../../system/cityofwinter/ops.js';
 
 export interface Env {
   ALLOWED_ORIGIN: string;
   SESSION_ROOM: DurableObjectNamespace<SessionRoom>;
+  LIBRARY: KVNamespace;
+  LIBRARY_KEY?: string;      // `wrangler secret put LIBRARY_KEY`; locally in .dev.vars
 }
+
+const LIBRARY_MAX = 25 * 1024 * 1024;   // KV's value limit
+const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml', 'image/avif'];
+interface LibraryMeta { name: string; size: number; type: string; uploaded: number; }
 
 type Role = 'gm' | 'player';
 interface Attachment {
@@ -56,14 +74,61 @@ function corsHeaders(env: Env, request: Request): HeadersInit {
   const origin = request.headers.get('Origin');
   return {
     'Access-Control-Allow-Origin': origin && originAllowed(env, origin) ? origin : allowedOrigins(env)[0],
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Library-Key',
     Vary: 'Origin',
   };
 }
 
 function json(env: Env, request: Request, status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...corsHeaders(env, request) } });
+}
+
+// ── the map library ──────────────────────────────────────────────────
+function libraryKeyOk(env: Env, request: Request): boolean {
+  const k = request.headers.get('X-Library-Key') || '';
+  return !!env.LIBRARY_KEY && k.length > 0 && k === env.LIBRARY_KEY;
+}
+
+async function library(env: Env, request: Request, parts: string[]): Promise<Response> {
+  if (!env.LIBRARY) return json(env, request, 503, { success: false, message: 'no library on this deployment' });
+  const rest = parts.slice(1).map(decodeURIComponent).join('/');
+  // the image: public, cached (a key is never reused)
+  if (request.method === 'GET' && rest) {
+    const obj = await env.LIBRARY.getWithMetadata<LibraryMeta>(rest, 'stream');
+    if (!obj.value) return json(env, request, 404, { success: false, message: 'not found' });
+    const meta = obj.metadata || ({} as LibraryMeta);
+    return new Response(obj.value, { headers: { 'Content-Type': meta.type || 'application/octet-stream', 'Cache-Control': 'public, max-age=31536000, immutable', ...corsHeaders(env, request) } });
+  }
+  if (!libraryKeyOk(env, request)) return json(env, request, 403, { success: false, message: env.LIBRARY_KEY ? 'library key wrong' : 'no library key set on this deployment' });
+  if (request.method === 'GET') {
+    const out: Array<LibraryMeta & { key: string }> = [];
+    let cursor: string | undefined;
+    do {
+      const page = await env.LIBRARY.list<LibraryMeta>({ cursor });
+      page.keys.forEach((k) => out.push({ key: k.name, ...(k.metadata || ({ name: k.name, size: 0, type: '', uploaded: 0 } as LibraryMeta)) }));
+      cursor = page.list_complete ? undefined : page.cursor;
+    } while (cursor);
+    out.sort((a, b) => b.uploaded - a.uploaded);
+    return json(env, request, 200, out);
+  }
+  if (request.method === 'PUT' && rest) {
+    const type = (request.headers.get('Content-Type') || '').split(';')[0].trim();
+    if (IMAGE_TYPES.indexOf(type) === -1) return json(env, request, 415, { success: false, message: 'images only (png, jpeg, webp, gif, svg, avif)' });
+    const body = await request.arrayBuffer();
+    if (!body.byteLength) return json(env, request, 400, { success: false, message: 'empty upload' });
+    if (body.byteLength > LIBRARY_MAX) return json(env, request, 413, { success: false, message: 'too large: the limit is 25 MB' });
+    const name = rest.replace(/[^A-Za-z0-9._ -]+/g, '_').slice(0, 120) || 'map';
+    const key = `${Date.now().toString(36)}-${randomCode(6).toLowerCase()}-${name}`;
+    const meta: LibraryMeta = { name, size: body.byteLength, type, uploaded: Date.now() };
+    await env.LIBRARY.put(key, body, { metadata: meta });
+    return json(env, request, 200, { key, ...meta });
+  }
+  if (request.method === 'DELETE' && rest) {
+    await env.LIBRARY.delete(rest);
+    return json(env, request, 200, { success: true });
+  }
+  return json(env, request, 404, { success: false, message: 'not found' });
 }
 
 export class SessionRoom extends DurableObject<Env> {
@@ -182,7 +247,7 @@ export class SessionRoom extends DurableObject<Env> {
         return;
 
       case 'init': {
-        if (att.role !== 'gm') return this.sendTo(ws, { type: 'error', message: 'only the GM can seed a session' });
+        if (att.role !== 'gm') return this.sendTo(ws, { type: 'error', message: 'only the facilitator can seed a session' });
         if (this.get('doc') && !msg.force) return this.sendTo(ws, this.snapshotFor(att));
         const doc: Record<string, unknown> = {};
         (Ops.SHARED_KEYS as string[]).forEach((k) => {
@@ -281,6 +346,7 @@ export default {
 
     const url = new URL(request.url);
     const parts = url.pathname.split('/').filter(Boolean);
+    if (parts[0] === 'library') return library(env, request, parts);
     if (parts[0] === 'session') {
       if (parts.length === 1 && request.method === 'POST') {
         for (let attempt = 0; attempt < 5; attempt++) {

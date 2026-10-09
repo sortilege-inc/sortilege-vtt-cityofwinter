@@ -6,6 +6,8 @@ build/__pycache__/
 # the Worker's toolchain and local Durable Object state
 worker/node_modules/
 worker/.wrangler/
+# the local library key (the deployed one is a Worker secret)
+worker/.dev.vars
 # map/art originals stay out; only the web-sized copies under assets/ are committed
 assets/originals/
 # a campaign is an instance, not part of the engine (see PLAN.md); keep any local one out

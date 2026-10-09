@@ -23,6 +23,9 @@ window.VttConfig = {
   hidePanes: ['overview', 'scenes', 'threads', 'places', 'people', 'tracker', 'scene', 'inspector', 'party', 'log', 'clocks', 'cast'],
   // what the shell calls the one who starts the room
   roleName: 'facilitator',
+  // the map library on the Worker (engine/library.js): the facilitator uploads maps to a live
+  // instance; none ship in the repo (PLAN.md, D4)
+  library: true,
   // The Worker that holds the rooms (M4). Served from localhost the app talks to `wrangler dev`;
   // deployed, to the URL below. Empty = sessions disabled.
   worker: {

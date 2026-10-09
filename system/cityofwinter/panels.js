@@ -1202,7 +1202,8 @@ window.CowPanels = (function () {
     opts = opts || {};
     return el('div', { class: 'playtable' },
       el('div', { class: 'playmain' }, st.setupComplete ? [chronicleBar(st), renderStage(st), renderLocation(st)] : renderSetup(st), renderFamily(st)),
-      el('aside', { class: 'playrail' }, el('section', { class: 'panel' }, renderTurn(st)), el('section', { class: 'panel' }, el('h3', { text: 'The record' }), renderRecord(st))));
+      el('aside', { class: 'playrail' }, el('section', { class: 'panel' }, renderTurn(st)),
+        opts.player ? null : el('section', { class: 'panel' }, el('h3', { text: 'The record' }), renderRecord(st))));   // the player's page shows the record as its feed
   }
 
   return { ui, bump, commit, S, renderSetup, renderStage, renderLocation, renderFamily, renderTurn, renderRecord, chronicleBar, wholeTable, notecard, namesList };

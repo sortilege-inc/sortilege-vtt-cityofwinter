@@ -922,3 +922,7 @@ body.play.mode-sheet .play-main{ max-width:1400px; }
 .site-head .brand-title{ font-family:var(--disp); color:var(--chalk); }
 .site-tab{ font-family:var(--caps); font-variant:small-caps; letter-spacing:0.08em; color:var(--chalk-dim); }
 .site-tab.active{ color:var(--ice); border-bottom-color:var(--ice-deep); }
+
+/* beside the map (Map + sheet) the sheet pane is narrow: the table stacks, rail below */
+body.play.mode-split .playtable{ grid-template-columns:1fr; }
+body.play.mode-split .playrail{ order:2; }

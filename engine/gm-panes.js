@@ -220,6 +220,17 @@
           row,
         ]));
       }
+      // the map library's key (engine/library.js): this browser only
+      if (window.VttLibrary && window.VttLibrary.enabled()) {
+        const Lib = window.VttLibrary;
+        const keyIn = el('input', { type: 'password', class: 'text', placeholder: 'the library key', value: Lib.key(), autocomplete: 'off' });
+        const note = el('span', { class: 'muted small' }, [Lib.ready() ? 'Set — the table page can upload and pick maps.' : 'Not set — the table page cannot upload yet.']);
+        container.appendChild(el('div', { class: 'paper settings-section' }, [
+          el('div', { class: 'guidance-k' }, ['The map library']),
+          el('p', { class: 'muted small' }, ['Maps are uploaded to this deployment’s Worker, not kept in the repo. The upload key is the Worker’s LIBRARY_KEY secret; enter it here once. It stays in this browser — not in the pack, not shared with the table.']),
+          el('div', { class: 'chiprow' }, [keyIn, button('Save', () => { Lib.setKey(keyIn.value.trim()); draw(); }, ''), button('Forget', () => { Lib.setKey(''); draw(); }, 'ghost'), note]),
+        ]));
+      }
       let on = !!CFG.siteBooks;
       try { const v = localStorage.getItem(BOOKS_KEY); if (v !== null) on = v === '1'; } catch (e) { /* the default */ }
       container.appendChild(el('div', { class: 'paper settings-section' }, [

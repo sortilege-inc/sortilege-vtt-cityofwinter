@@ -1090,7 +1090,38 @@
       setImg.click();
       pickMap.value = '';
     });
-    toolbar.appendChild(el('div', { class: 'group' }, [pickMap, img, setImg]));
+    // the library (engine/library.js): uploaded images, when this deployment has one and this
+    // browser holds the key
+    const Lib = window.VttLibrary;
+    const libGroup = [];
+    if (Lib && Lib.enabled() && !PLAYER) {
+      const pickLib = el('select', { class: 'vtt-select' }, [el('option', { value: '' }, [Lib.ready() ? 'the library…' : 'the library (key in Settings)'])]);
+      pickLib.disabled = !Lib.ready();
+      if (Lib.ready()) Lib.list().then((rows) => rows.forEach((r) => pickLib.appendChild(el('option', { value: r.url }, [r.name])))).catch((e) => { pickLib.appendChild(el('option', { value: '' }, [e.message])); });
+      pickLib.addEventListener('change', () => {
+        if (!pickLib.value) return;
+        img.value = pickLib.value;
+        setImg.click();
+        pickLib.value = '';
+      });
+      const file = el('input', { type: 'file', accept: 'image/*', hidden: true });
+      const up = el('button', { class: 'btn ghost', title: 'Upload an image to the library and put it on the table' }, ['Upload…']);
+      up.disabled = !Lib.ready();
+      up.addEventListener('click', () => file.click());
+      file.addEventListener('change', () => {
+        const f = file.files && file.files[0];
+        if (!f) return;
+        up.disabled = true;
+        up.textContent = 'Uploading…';
+        Lib.upload(f).then((r) => {
+          pickLib.insertBefore(el('option', { value: r.url }, [r.name]), pickLib.options[1] || null);
+          img.value = r.url;
+          setImg.click();
+        }).catch((e) => alert(e.message)).finally(() => { up.disabled = false; up.textContent = 'Upload…'; file.value = ''; });
+      });
+      libGroup.push(pickLib, up, file);
+    }
+    toolbar.appendChild(el('div', { class: 'group' }, [pickMap].concat(libGroup, [img, setImg])));
 
     toolbar.appendChild(el('div', { class: 'group' }, [
       el('span', { class: 'muted' }, ['Grid']),

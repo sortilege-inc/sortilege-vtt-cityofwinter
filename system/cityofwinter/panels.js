@@ -57,6 +57,14 @@ window.CowPanels = (function () {
 
   const instr = (text) => ruleText(text, { cls: 'instr' });
   const teach = (text) => ruleText(text, { cls: 'teach aloud' });
+  /** A long read-aloud passage: its first paragraph, the rest behind "Read on" (setup only). */
+  function teachFold(text) {
+    const paras = String(text || '').split(/\n\s*\n/).filter((x) => x.trim());
+    if (paras.length < 2) return teach(text);
+    const d = details(`Read on · ${paras.length - 1} more paragraph${paras.length === 2 ? '' : 's'}`, ruleText(paras.slice(1).join('\n\n'), { cls: 'teach' }));
+    d.classList.add('readon');
+    return el('div', { class: 'teachfold' }, teach(paras[0]), d);
+  }
 
   /** The one sentence of a rule that contains `needle` — quoted whole, never trimmed. */
   function sentence(text, needle) {
@@ -168,7 +176,7 @@ window.CowPanels = (function () {
 
   function setupIntro(st, step) {
     return el('div', {}, instr(step.instruction),
-      el('div', { class: 'readaloud' }, step.substeps.map((ss) => el('section', {}, el('h3', { text: ss.name }), teach(ss.teaching),
+      el('div', { class: 'readaloud' }, step.substeps.map((ss) => el('section', {}, el('h3', { text: ss.name }), teachFold(ss.teaching),
         ss.name.includes('X-Card') ? el('button', { class: 'xbtn', text: '✕ The X-Card', onclick: xcard }) : null))),
       setupNav(st, { back: false, next: 'Choose our home' }));
   }
@@ -176,7 +184,7 @@ window.CowPanels = (function () {
   function setupHome(st, step) {
     const city = st.setup.start === 'city';
     const box = el('div', {});
-    if (!city) add(box, instr(step.instruction), teach(step.teaching));
+    if (!city) add(box, instr(step.instruction), teachFold(step.teaching));
     const pickHome = (home, tradition, region) => commit('chooseHome', { home, tradition, region });
     if (!city) {
       add(box, el('div', { class: 'homes' }, D.startingHomes.map((loc) => homeCard(loc, loc.traditions[0], st.family.home === loc.name, () => pickHome(loc.name, loc.traditions[0], 'Riverlands')))));
@@ -234,7 +242,7 @@ window.CowPanels = (function () {
     };
     name.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
     pron.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
-    return el('div', {}, instr(step.instruction), teach(step.teaching),
+    return el('div', {}, instr(step.instruction), teachFold(step.teaching),
       st.variants['Solo Play'] ? el('div', { class: 'callout small' }, instr(D.guidanceText('solo-first-session'))) : null,
       el('div', { class: 'banner' },
         el('div', { class: 'bannerhead' }, shapeIcon(deck.shape), el('span', { text: `${deck.banner} Banner` })),
@@ -251,7 +259,7 @@ window.CowPanels = (function () {
   }
 
   function setupAge(st, step) {
-    return el('div', {}, teach(step.teaching),
+    return el('div', {}, teachFold(step.teaching),
       el('div', { class: 'agelist' }, st.characters.map((c) => {
         const tier = D.tierForMarks(c.marks);
         const setMarks = (m) => commit('setMarks', { id: c.id, marks: m });
@@ -269,7 +277,7 @@ window.CowPanels = (function () {
   function setupBonds(st, step) {
     const deck = D.byDeck.get(st.family.tradition);
     const mains = new Set(st.characters.map((c) => c.name));
-    return el('div', {}, teach(step.teaching),
+    return el('div', {}, teachFold(step.teaching),
       el('div', { class: 'bondgrid' }, st.characters.map((c) => {
         const withMain = c.bonds.some((b) => mains.has(b.subject));
         const status = c.bonds.length < 2 ? `${c.bonds.length} of 2 Bonds` : withMain || st.characters.length === 1 ? 'Two Bonds' : 'Needs a Bond with another main character';
@@ -299,7 +307,7 @@ window.CowPanels = (function () {
       }
     };
     return el('div', {},
-      el('h3', { text: choose1.name }), instr(choose1.instruction), teach(choose1.teaching),
+      el('h3', { text: choose1.name }), instr(choose1.instruction), teachFold(choose1.teaching),
       el('div', { class: 'holdtabs', role: 'tablist' }, st.characters.map((c) => {
         const lim = R.handLimit(c);
         return el('button', { type: 'button', role: 'tab', class: `holdtab ${c.id === ui.holdFor ? 'on' : ''} ${c.hand.length >= lim ? 'full' : ''}`.trim(), 'aria-selected': String(c.id === ui.holdFor), disabled: lim === 0,
@@ -323,7 +331,7 @@ window.CowPanels = (function () {
   }
 
   function setupTokens(st, step) {
-    return el('div', {}, instr(step.instruction), teach(step.teaching),
+    return el('div', {}, instr(step.instruction), teachFold(step.teaching),
       el('p', { class: 'small muted', text: 'The boxed Tokens are picture discs; here each character wears a colour and their initial.' }),
       el('div', { class: 'tokengrid' }, st.characters.map((c) => el('div', { class: 'tokenrow' }, who(c), swatches(st, c)))),
       setupNav(st, { next: 'Introduce the Umbra' }));
@@ -339,7 +347,7 @@ window.CowPanels = (function () {
     else if (fleeing) {
       const paras = D.optional('Fleeing the City').text.split(/\n\s*\n/);
       add(box, instr(step.instruction), el('div', { class: 'prelude' }, teach(paras[paras.indexOf('New Prelude') + 1])), instr(step.followUp), teach(step.teachingTwo));
-    } else add(box, variantToggles(st, ['The Umbra Follows']), follows ? teach(step.teachingTwo) : null);
+    } else add(box, variantToggles(st, ['The Umbra Follows']), follows ? teachFold(step.teachingTwo) : null);
     add(box, el('div', { class: 'setupnav' },
       el('button', { class: 'ghost', text: '← Back', onclick: () => commit('setupStage', { stage: 6 }) }), el('span', { class: 'grow' }),
       el('button', { class: 'primary big', text: umbra ? 'Place the Umbra Deck and begin' : 'Begin the first Chapter', onclick: () => commit('beginPlay', { umbra }) })));
@@ -448,6 +456,7 @@ window.CowPanels = (function () {
 
     const TS = 'Tradition Scene';
     if (ph === 'choose-scene') {
+      ui.sw = null;                       // step 2's choice starts fresh each turn
       const s1 = D.step(TS, 'Choose a Scene');
       add(stage, stageHead(`${cur.name}’s turn · ${TS}`, s1.name, cur, TS), stepper(TS, 1), el('p', { class: 'action', text: 'Choose a Scene on the location →' }), instr(s1.instruction));
       const acts = el('div', { class: 'altacts' });
@@ -460,8 +469,8 @@ window.CowPanels = (function () {
     }
     if (ph === 'share-or-witness') {
       const s2 = D.step(TS, 'Share or witness?');
-      add(stage, stageHead(`${cur.name}’s turn · ${TS}`, st.turn.scene, cur, TS), stepper(TS, 2), instr(s2.instruction),
-        el('div', { class: 'options two' }, shareOption(st, cur, s2), witnessOption(st, cur, s2)),
+      add(stage, stageHead(`${cur.name}’s turn · ${TS}`, st.turn.scene, cur, TS), stepper(TS, 2), el('p', { class: 'action', text: 'Share or witness?' }), instr(s2.instruction),
+        shareOrWitness(st, cur, s2),
         el('div', { class: 'btnrow' }, el('button', { class: 'ghost tiny', text: '← Choose a different Scene', onclick: () => commit('unchooseScene', { id: cur.id }) })));
       return stage;
     }
@@ -503,17 +512,35 @@ window.CowPanels = (function () {
     return box;
   }
 
-  function shareOption(st, cur, s2) {
-    const o = s2.options.find((x) => x.name === 'Share a Tradition');
-    const can = cur.hand.length > 0;
-    return el('div', { class: `option ${can ? '' : 'off'}`.trim() }, el('h3', { text: o.name }), instr(o.instruction),
-      can ? el('div', {}, el('div', { class: 'small muted', text: 'Choose the card from your hand:' }),
-        el('div', { class: 'cardrow' }, cur.hand.map((id) => cardEl(card(id), { onclick: () => commit('share', { id: cur.id, cardId: id }) })))) : null);
-  }
-
-  function witnessOption(st, cur, s2) {
+  /** Step 2 as a choice first: two cards (the book's own sentence for each), then only the chosen
+   *  option's controls — the hand to share from, or what a witness draws and for whom. */
+  function shareOrWitness(st, cur, s2) {
+    const share = s2.options.find((x) => x.name === 'Share a Tradition');
+    const witness = s2.options.find((x) => x.name === 'Witness a Tradition');
+    const canShare = cur.hand.length > 0;
     const loc = whereIs(st, cur);
     const opts = R.witnessOptions(st, loc.name);
+    const drawsFrom = opts.map((o) => (o.blank ? `any ${o.shape} deck` : o.decks[0]));
+    if (ui.sw === 'share' && !canShare) ui.sw = null;
+    const pick = (k) => { ui.sw = k; bump(); };
+    const cards = el('div', { class: 'choices' },
+      el('button', { type: 'button', class: `choice ${ui.sw === 'share' ? 'on' : ''}`.trim(), disabled: !canShare, 'aria-pressed': String(ui.sw === 'share'), onclick: () => pick('share') },
+        el('span', { class: 'cname', text: share.name }), el('span', { class: 'csum', text: canShare ? `Play one of your ${cur.hand.length} card${cur.hand.length === 1 ? '' : 's'}` : 'Your hand is empty' }), instr(share.instruction)),
+      el('button', { type: 'button', class: `choice ${ui.sw === 'witness' ? 'on' : ''}`.trim(), 'aria-pressed': String(ui.sw === 'witness'), onclick: () => pick('witness') },
+        el('span', { class: 'cname', text: witness.name }), el('span', { class: 'csum', text: `Draw ${opts.length} card${opts.length === 1 ? '' : 's'} — ${drawsFrom.join(', ')} — for another player` }), instr(witness.instruction)));
+    const box = el('div', { class: 'sharewitness' }, cards);
+    if (ui.sw === 'share') add(box, shareOption(st, cur, share));
+    if (ui.sw === 'witness') add(box, witnessOption(st, cur, witness, opts));
+    return box;
+  }
+
+  function shareOption(st, cur, o) {
+    return el('div', { class: 'option chosen' }, el('div', { class: 'k small', text: 'Choose the card from your hand' }),
+      el('div', { class: 'cardrow' }, cur.hand.map((id) => cardEl(card(id), { onclick: () => commit('share', { id: cur.id, cardId: id }) }))));
+  }
+
+  function witnessOption(st, cur, o, opts) {
+    const loc = whereIs(st, cur);
     const inCity = R.regionOf(st, cur) === 'City';
     const solo = !!st.variants['Solo Play'];
     const recips = R.activeCharacters(st).filter((c) => c.id !== cur.id);
@@ -521,24 +548,27 @@ window.CowPanels = (function () {
       ui.witness = { loc: loc.name, n: opts.length, picks: opts.map((o) => (o.blank ? (o.decks.length === 1 ? o.decks[0] : null) : o.decks[0])), to: recips.length === 1 ? recips[0].id : null };
     }
     const w = ui.witness;
-    const o = s2.options.find((x) => x.name === 'Witness a Tradition');
-    const box = el('div', { class: 'option' }, el('h3', { text: o.name }));
-    if (inCity) {
-      add(box, instr(D.rule('Witnessing in the City')));
-      if (opts.some((x) => x.blank)) add(box, details('Blank Tradition Icons', instr(D.rule('Blank Tradition Icons'))));
-    } else add(box, instr(o.instruction));
+    const box = el('div', { class: 'option chosen' });
+    if (inCity) add(box, details('Witnessing in the City', instr(D.rule('Witnessing in the City')), opts.some((x) => x.blank) ? instr(D.rule('Blank Tradition Icons')) : null));
     if (solo) add(box, details('Solo Play', instr(sentence(D.optional('Solo Play').text, 'When you would Witness'))));
+    // what is drawn: fixed icons as a line; a blank icon asks which deck
+    const fixed = opts.filter((op) => !op.blank || op.decks.length === 1);
+    if (fixed.length) add(box, el('div', { class: 'drawline' }, el('span', { class: 'k', text: fixed.length === 1 ? 'Draws' : `Draws ${fixed.length} cards` }), fixed.map((op) => el('span', { class: 'deckchip-inline' }, shapeIcon(op.shape), op.decks[0]))));
     opts.forEach((op, i) => {
-      add(box, el('div', { class: 'drawrow' }, el('span', { class: 'k' }, shapeIcon(op.shape), op.blank ? `Blank ${op.shape} icon` : `${op.decks[0]} icon`),
+      if (!op.blank || op.decks.length === 1) return;
+      add(box, el('div', { class: 'drawrow' }, el('span', { class: 'k' }, shapeIcon(op.shape), `Blank ${op.shape} icon — from`),
         el('div', { class: 'deckpicks' }, op.decks.map((d) => el('button', { type: 'button', class: `deckpick ${w.picks[i] === d ? 'on' : ''} ${d === 'Umbra' ? 'umbra' : ''}`.trim(), 'aria-pressed': String(w.picks[i] === d), onclick: () => { w.picks[i] = d; bump(); } },
           shapeIcon((D.byDeck.get(d) || {}).shape), d)))));
     });
-    add(box, el('div', { class: 'k small', text: solo ? 'Give the cards to (optional in Solo Play)' : 'Give the cards to' }),
-      pickChars(recips, w.to, (c) => { w.to = w.to === c.id ? null : c.id; bump(); }),
-      details('Juggling roles', instr(D.guidanceText('role-juggling'))));
+    if (recips.length > 1 || solo) {
+      add(box, el('div', { class: 'k small', text: solo ? 'Give the cards to (optional in Solo Play)' : 'Give the cards to' }),
+        pickChars(recips, w.to, (c) => { w.to = w.to === c.id ? null : c.id; bump(); }));
+    }
+    add(box, details('Juggling roles', instr(D.guidanceText('role-juggling'))));
     const ready = w.picks.every(Boolean) && (w.to || solo);
-    add(box, el('div', { class: 'btnrow' }, el('button', { class: 'primary', text: `Draw ${w.picks.length} card${w.picks.length === 1 ? '' : 's'}`, disabled: !ready,
-      onclick: () => { const p = { id: cur.id, to: w.to, picks: w.picks.slice() }; ui.witness = null; ui.passPick = null; commit('witness', p); } })));
+    const toName = w.to ? (chById(w.to) || {}).name : null;
+    add(box, el('div', { class: 'btnrow' }, el('button', { class: 'primary big', text: `Draw ${w.picks.length} card${w.picks.length === 1 ? '' : 's'}${toName ? ` for ${toName}` : ''}`, disabled: !ready,
+      onclick: () => { const p = { id: cur.id, to: w.to, picks: w.picks.slice() }; ui.witness = null; ui.passPick = null; ui.sw = null; commit('witness', p); } })));
     return box;
   }
 

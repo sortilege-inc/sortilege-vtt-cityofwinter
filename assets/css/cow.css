@@ -1028,3 +1028,24 @@ mark{ background:rgba(237,199,106,0.35); color:inherit; border-radius:2px; paddi
   .site-head .site-links .btn.ghost{ display:none; }
   .site-head .brand-title{ font-size:1.5rem; }
 }
+
+/* step 2: share or witness — a choice first */
+.choices{ display:grid; gap:0.6rem; margin:0.4rem 0 0.8rem; }
+.choice{
+  display:grid; gap:0.2rem; text-align:left; font:inherit; color:var(--chalk); cursor:pointer;
+  background:rgba(0,0,0,0.2); border:1px solid var(--edge); border-radius:8px; padding:0.7rem 0.95rem 0.75rem;
+}
+.choice:hover:not([disabled]){ border-color:var(--ice-deep); }
+.choice.on{ border-color:var(--gold-lit); box-shadow:inset 0 0 0 1px var(--gold-lit); background:rgba(209,161,60,0.08); }
+.choice[disabled]{ opacity:0.5; cursor:not-allowed; }
+.choice .cname{ font-family:var(--disp); font-size:1.25rem; }
+.choice .csum{ font-family:var(--caps); font-variant:small-caps; letter-spacing:0.07em; font-size:0.92rem; color:var(--ice); }
+.choice .rtext{ margin:0.25rem 0 0; font-size:0.95rem; color:var(--chalk-dim); }
+.option.chosen{ border-color:rgba(209,161,60,0.4); }
+.drawline{ display:flex; flex-wrap:wrap; align-items:center; gap:0.4rem; margin:0.3rem 0 0.6rem; }
+.drawline .k{ font-family:var(--caps); font-variant:small-caps; letter-spacing:0.08em; font-size:0.9rem; color:var(--chalk-dim); }
+.deckchip-inline{ display:inline-flex; align-items:center; gap:0.25rem; padding:0.1rem 0.6rem; border:1px solid var(--edge); border-radius:99px; font-size:0.95rem; }
+/* read-aloud folds in setup */
+.teachfold .rtext.teach{ margin-bottom:0.3rem; }
+details.readon{ margin:0 0 0.9rem 1.1rem; }
+details.readon .rtext.teach{ border-left:none; padding-left:0; margin:0.2rem 0 0; }

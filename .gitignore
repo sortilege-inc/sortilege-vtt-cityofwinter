@@ -12,3 +12,4 @@ worker/.dev.vars
 assets/originals/
 # a campaign is an instance, not part of the engine (see PLAN.md); keep any local one out
 campaigns/
+worker/LIBRARY_KEY.local

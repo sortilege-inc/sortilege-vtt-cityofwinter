@@ -1,5 +1,7 @@
 # sortilege-vtt-cityofwinter
 
+Live at [cityofwinter.sortilege.online](https://cityofwinter.sortilege.online/) — the site; `gm/` is the facilitator's table, `gm/play.html` a player's page.
+
 A virtual tabletop for **City of Winter** (Ross Cowman, Heart of the Deernicorn, 2022) — the
 family's table on every player's device, the River Scroll and the City Map, the Tradition Decks,
 and the rules, built from the [Titterpig DSL corpus](https://github.com/sortilege-inc/city-of-winter)

@@ -1011,3 +1011,20 @@ mark{ background:rgba(237,199,106,0.35); color:inherit; border-radius:2px; paddi
   .reader-site .reader-toc{ display:none; position:static; max-height:none; }
   .reader-site.toc-open .reader-toc{ display:block; }
 }
+
+/* the River Scroll before a home is chosen (the location panel during setup) */
+.plate.scroll .scrollhomes{ display:grid; gap:0.7rem; margin:0.6rem 0 0.4rem; }
+.scrollhome{
+  display:grid; gap:0.35rem; text-align:left; font:inherit; color:var(--chalk); cursor:pointer;
+  background:linear-gradient(155deg, rgba(76,106,128,0.28), rgba(18,18,26,0.96) 65%); border:1px solid var(--edge); border-radius:8px; padding:0.7rem 0.9rem 0.8rem;
+}
+.scrollhome:hover{ border-color:var(--ice-deep); box-shadow:0 0 0 1px rgba(127,169,194,0.35); }
+.scrollhome .cat{ display:inline-flex; align-items:center; gap:0.3rem; font-family:var(--caps); font-variant:small-caps; letter-spacing:0.08em; font-size:0.86rem; color:var(--ice-deep); }
+.scrollhome .nm{ font-family:var(--disp); font-size:1.35rem; line-height:1.1; }
+.scenegrid.mini{ display:flex; flex-wrap:wrap; gap:0.3rem; }
+.scenegrid.mini .scenetile{ font-size:0.86rem; padding:0.15rem 0.5rem; min-height:0; }
+@media (max-width:640px){
+  .site-head .brand-sub{ display:none; }
+  .site-head .site-links .btn.ghost{ display:none; }
+  .site-head .brand-title{ font-size:1.5rem; }
+}

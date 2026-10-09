@@ -18,7 +18,7 @@ window.VttConfig = {
   // the facilitator's table: the stage, the location and the family across; the rail panels behind
   defaultSlots: ['stage', 'location', 'family'],
   regionFallback: ['turn', 'record', 'rules'],
-  presets: { Setup: ['stage', 'family', 'rules'], Playing: ['stage', 'location', 'family'], Reading: ['rules', 'atlas', 'traditions'] },
+  presets: { Setup: ['stage', 'location', 'family'], Playing: ['stage', 'location', 'family'], Reading: ['rules', 'atlas', 'traditions'] },
   // the GM-only panes have nothing to hold here: there is no prep, no scenes, no threads
   hidePanes: ['overview', 'scenes', 'threads', 'places', 'people', 'tracker', 'scene', 'inspector', 'party', 'log', 'clocks', 'cast'],
   // what the shell calls the one who starts the room

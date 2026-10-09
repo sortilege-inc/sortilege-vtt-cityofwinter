@@ -915,7 +915,7 @@ window.CowPanels = (function () {
     const ph = st.turn.phase;
     const plateCh = ph === 'memory-share' ? chById(st.turn.memoryTarget) : cur && cur.isMemory && ui.memTarget ? chById(ui.memTarget) : cur;
     const loc = whereIs(st, plateCh && !plateCh.isMemory ? plateCh : null);
-    if (!loc) return el('div', { class: 'empty', text: st.setupComplete ? 'No location.' : 'The family has no home yet.' });
+    if (!loc) return st.setupComplete ? el('div', { class: 'empty', text: 'No location.' }) : riverScroll(st);
     const isBorough = loc.name === BOROUGH;
     const region = isBorough ? 'borough' : loc.region === 'City' ? 'city' : 'river';
     const here = (c) => (c.visiting || R.homeOf(st, c)) === loc.name;
@@ -944,6 +944,23 @@ window.CowPanels = (function () {
           el('span', { class: 'sname', text: s }), toks.length ? el('span', { class: 'toks' }, toks.map((c) => tok(c, { size: 'sm' }))) : null);
       })),
       atLoc.length ? el('div', { class: 'athome' }, el('span', { class: 'k', text: 'Tokens on the location' }), atLoc.map((c) => tok(c, { size: 'sm' }))) : null);
+  }
+
+  /** Before a home is chosen: the River Scroll unrolled to the three starting Locations (the
+   *  book's step 2); choosing one here is the same choice as on the stage. */
+  function riverScroll(st) {
+    const s1 = D.step(SETUP, 'Choose Home & Tradition');
+    return el('section', { class: 'plate river scroll', 'aria-label': 'The River Scroll' },
+      el('header', { class: 'platehead' }, el('div', {}, el('div', { class: 'eyebrow', text: 'The Riverlands · the River Scroll' }), el('h2', { text: 'Where the family begins' }))),
+      instr(sentence(s1.instruction, 'Unroll the River Scroll')),
+      el('div', { class: 'scrollhomes' }, D.startingHomes.map((loc) => {
+        const k = D.byDeck.get(loc.traditions[0]);
+        return el('button', { type: 'button', class: 'scrollhome', onclick: () => commit('chooseHome', { home: loc.name, tradition: loc.traditions[0], region: 'Riverlands' }) },
+          el('span', { class: 'cat' }, shapeIcon(k && k.shape), loc.traditions[0]),
+          el('span', { class: 'nm', text: locName(loc.name) }),
+          el('span', { class: 'scenegrid mini' }, loc.scenes.map((s) => el('span', { class: 'scenetile', text: s }))));
+      })),
+      el('p', { class: 'small muted', text: 'Choose here or on the stage; the City is a variant on the stage.' }));
   }
 
   /* ============================================================= THE FAMILY == */
@@ -1176,7 +1193,7 @@ window.CowPanels = (function () {
   Panels.register('rules', { label: 'Rules & Books', render: renderRules });
   Panels.register('atlas', { label: 'Atlas', render(container) { clear(container); add(container, renderAtlas()); } });
   Panels.register('traditions', { label: 'Traditions', render(container) { clear(container); add(container, renderTraditions(container)); } });
-  Panels.register('campaign', panel('The family’s table', renderCampaign));
+  Panels.register('campaign', panel('This family', renderCampaign));
 
   /** The whole table in one element — the player's page (system.js liveSheet). */
   function wholeTable(st, opts) {

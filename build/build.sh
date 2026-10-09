@@ -13,6 +13,8 @@ echo "--- build ($CORPUS)"
 python3 build/build_data.py "$CORPUS"
 echo "--- verify"
 python3 build/verify_data.py "$CORPUS"
+echo "--- facts (the game's facts for the rules, from data/)"
+python3 build/facts_cityofwinter.py
 echo "--- syntax"
-for f in data/*.js; do node --check "$f"; done
+for f in data/*.js system/cityofwinter/facts.js; do node --check "$f"; done
 echo "build.sh: OK"

@@ -20,7 +20,7 @@
   // with every tab closed, the site is a page that says so
   if (!tabs.length) tabs.push({ id: 'home', label: CFG.title || 'Home', render: (main) => main.appendChild(el('div', { class: 'site-closed' }, [
     el('h1', {}, [CFG.title || '']),
-    el('p', { class: 'muted' }, ['The books are closed on this site. The GM opens them in the GM page’s Settings.']),
+    el('p', { class: 'muted' }, ['The books are closed on this site. The ' + (CFG.roleName || 'GM') + ' opens them in the table page’s Settings.']),
   ])) });
   const bar = document.getElementById('site-tabs');
   const main = document.getElementById('site-main');

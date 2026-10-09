@@ -44,15 +44,19 @@ a group decision. So:
 Found and left as is: the parser reads `SCOPE GLOBAL` as two bare statements (every all-caps word
 starts one); nothing is lost — `DEFAULT off` keeps its value — and the system reads it as such.
 
+11. **The engine says GM; this deployment says facilitator.** The family's engine wording is now read from `VttConfig.roleName` (`app.js` title, `play.js` join hints, `site.js` closed-books note) — a config knob, default `'GM'`, so a port back to a sibling is a no-op. Nothing else in `engine/` changed for M2 beyond the config-driven slots/presets/`inverseOf` noted at M1.
+12. **`teeth.css` → `shell.css`.** The family stylesheet is kept whole and renamed; `cow.css` sets the shell's palette variables (`--paper`, `--ink`, `--blood`, …) to the winter night and carries the game's own styles from `web/winter.css` + `web/table/table.css`. One layout override: in three columns the stage takes 36 %, the family 28 %.
+13. **The player's page shows the whole table.** `VttSystem.liveSheet` returns `CowPanels.wholeTable` (stage + location + every notecard with the player's own marked + turn order + record) — there is no private sheet in this game. Seat = family member; join → add yourself / claim (M3).
+
 ## Milestones
 
 | # | Milestone | Proof |
 |---|---|---|
 | M1 | `build/` generates `data/` from the corpus with the two-way gate | **landed 2026-10-09** — `build.sh`: 14 DSL files + 5 lore, 3 books, 722 entities (249 cards, 195 scenes, 32 locations, 11 procedures / 50 steps, 27 rules, 27 guidance entries, 8 hooks); `verify_data: 1459 DSL strings + 141 lore lines — 0 uncovered · 0 unsourced`; the gate proven to fail on a planted mangled prompt (1 uncovered, 1 unsourced) and clean after restore |
-| M2 | `system/cityofwinter/`: data accessors; the game as ops with inverses; the facilitator's table — Stage · Location · Family · Turn & decks · Record · Rules & Books · Atlas · Traditions · Campaign — in the family's shell | |
+| M2 | `system/cityofwinter/`: data accessors; the game as ops with inverses; the facilitator's table — Stage · Location · Family · Turn & decks · Record · Rules & Books · Atlas · Traditions · Campaign — in the family's shell | **landed 2026-10-09** — `facts.js` (generated, 10 decks / 249 cards / 32 locations, every string checked against `data/`), `rules.js` (the game, pure), `ops.js` (54 named ops, every one with a snapshot inverse, rule `anyone`), `ui.js`, `data.js`, `panels.js` (9 panels), `system.js` (adapter), `site.js`, `cow.css` over `shell.css`. Proof in the browser at `gm/`: First Session Setup walked end to end through the real controls (Rivertown · Blossom Elder / Olive Parent · 4 Bonds · 9 cards held · tokens · Umbra placed), then a full Tradition Scene (Ox Bridge → witness → Olive holds, plays, passes → End the Scene → pass the turn) and Undo through the engine (`Undone: Blossom ends the scene.`); every panel opened; console clean throughout. Node: `rules.js` + ops through `engine/ops.js` smoke-tested (chooseHome → beginPlay → firstTurn, inverse, permits) |
 | M3 | The player's page: join, add yourself or claim a seat, the same table from your own device; phone layout | |
 | M4 | Sessions: the Worker, everyone-may-act rules, the map library (D4), two-origin live proof | |
-| M5 | The site: Rules, Atlas, Traditions over `data/` | |
+| M5 | The site: Rules, Atlas, Traditions over `data/` | **landed with M2** — `site.js` mounts the same three panels as site tabs (`#rules` `#atlas` `#traditions`); proven at `index.html`, console clean |
 | M6 | Deploy: Pages, Worker, the domain moved, the old `web/` retired | |
 
 ## Family port notes

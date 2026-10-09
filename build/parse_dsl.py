@@ -379,6 +379,8 @@ class Parser:
             node["type"] = "ENUM"
             if self.peek() and self.peek().kind == "LBRACK":
                 node["options"] = [e["v"] for e in self.parse_list() if e.get("k") == "str"]
+            elif self.peek() and self.peek().kind == "STR":
+                node["value"] = unescape(self.next().val)   # `^"Region" ENUM "City"` — a chosen value
             return node
         if t.kind == "ID" and t.val in SCALAR_TYPES:
             node["type"] = self.next().val

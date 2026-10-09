@@ -150,7 +150,7 @@
     });
     return el('div', { class: 'play-card' }, [
       el('h1', {}, ['Join the table']),
-      el('p', {}, ['Your GM gave you a room code. Enter it to claim your character — or bring the one you made.']),
+      el('p', {}, ['Your ' + (CFG.roleName || 'GM') + ' gave you a room code. Enter it to claim your character — or bring the one you made.']),
       el('div', { class: 'chiprow' }, [code, go]),
       msg,
       characterLoader('made on the site’s character creator; it joins the party when you do'),
@@ -168,7 +168,7 @@
     });
     return el('div', { class: 'play-card' }, [
       el('h1', {}, ['Who are you?']),
-      party.length ? el('div', { class: 'cards' }, cards) : el('p', { class: 'muted' }, [s.connected ? 'The GM hasn’t added any characters yet.' : 'Connecting…']),
+      party.length ? el('div', { class: 'cards' }, cards) : el('p', { class: 'muted' }, [s.connected ? 'The ' + (CFG.roleName || 'GM') + ' hasn’t added any characters yet.' : 'Connecting…']),
       characterLoader('made on the site’s character creator'),
     ]);
   }
@@ -218,7 +218,7 @@
     if (s.active && !s.connected) {
       bannerEl.appendChild(el('div', { class: 'banner warn' }, [
         el('b', {}, [s.status === 'connecting' ? 'Connecting to the table…' : 'Lost the table — reconnecting…']),
-        ' What you change now reaches the GM when the connection is back. ',
+        ' What you change now reaches the ' + (CFG.roleName || 'GM') + ' when the connection is back. ',
         button('Retry now', () => Session.reconnect(), 'ghost tiny'),
       ]));
     }

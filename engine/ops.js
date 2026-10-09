@@ -98,6 +98,10 @@
     placeToken: (s, [mapId]) => ((s.maps || {})[mapId] ? ['setMapState', [mapId, clone(s.maps[mapId])]] : null),
     setTokenPosition: (s, [mapId, tid]) => { const t = (((s.maps || {})[mapId] || {}).tokens || []).find((x) => x.id === tid); return t ? ['setTokenPosition', [mapId, tid, t.x, t.y]] : null; },
   };
+  // a system registers the inverse of its own ops the same way (City of Winter's game ops)
+  function inverseOf(name, fn) {
+    INVERSE[name] = fn;
+  }
   function inverse(s, name, args) {
     const f = INVERSE[name];
     if (!f) return null;
@@ -263,5 +267,5 @@
     return doc;
   });
 
-  return { OPS, PLAYER_RULES, SHARED_KEYS, LOCAL, register, shared, playerFilter, apply, permits, playerView, forPlayers, sharedSlice, inverse };
+  return { OPS, PLAYER_RULES, SHARED_KEYS, LOCAL, register, shared, playerFilter, apply, permits, playerView, forPlayers, sharedSlice, inverse, inverseOf };
 });

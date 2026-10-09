@@ -146,6 +146,8 @@ def prop_value(p):
     if t == "ENUM":
         v["vk"] = "enum"
         v["options"] = p.get("options", [])
+        if "value" in p:
+            v["value"] = p["value"]
         return v
     if t == "REF":
         v["vk"] = "ref"

@@ -15,6 +15,14 @@ window.VttConfig = {
   // acts (PLAN.md, D3). So the family's veil before /gm/ is off and the books are open on the site.
   siteBooks: true,
   gmGate: null,
+  // the facilitator's table: the stage, the location and the family across; the rail panels behind
+  defaultSlots: ['stage', 'location', 'family'],
+  regionFallback: ['turn', 'record', 'rules'],
+  presets: { Setup: ['stage', 'family', 'rules'], Playing: ['stage', 'location', 'family'], Reading: ['rules', 'atlas', 'traditions'] },
+  // the GM-only panes have nothing to hold here: there is no prep, no scenes, no threads
+  hidePanes: ['overview', 'scenes', 'threads', 'places', 'people', 'tracker', 'scene', 'inspector', 'party', 'log', 'clocks', 'cast'],
+  // what the shell calls the one who starts the room
+  roleName: 'facilitator',
   // The Worker that holds the rooms (M4). Served from localhost the app talks to `wrangler dev`;
   // deployed, to the URL below. Empty = sessions disabled.
   worker: {

@@ -10,9 +10,9 @@
   const CFG = window.VttConfig;
 
   const WIDE = 1100;
-  const DEFAULT_SLOTS = ['tracker', 'scene', 'inspector'];
+  const DEFAULT_SLOTS = CFG.defaultSlots || ['tracker', 'scene', 'inspector'];   // a system's or an instance's own (VttConfig.defaultSlots)
   // what the regions beyond the first three open on, in a split layout
-  const REGION_FALLBACK = DEFAULT_SLOTS.concat(['party', 'log', 'clocks', 'cast']);
+  const REGION_FALLBACK = DEFAULT_SLOTS.concat(CFG.regionFallback || ['party', 'log', 'clocks', 'cast']);
 
   // The wide-mode layouts the GM picks from (Settings ▸ Layout — a per-browser preference; ported
   // from sortilege-vtt-daggerheart). A layout is a set of columns; a column holds one region or
@@ -31,7 +31,7 @@
   const brand = document.getElementById('brand');
 
   let mode = null;
-  let single = 'tracker';
+  let single = DEFAULT_SLOTS[0];
   let ctxs = [];
 
   function layoutDef() {
@@ -264,7 +264,7 @@
     };
     wc.appendChild(el('div', { class: 'chiprow history' }, [undoBtn, redoBtn]));
     // panel presets: what the three slots show (one click each)
-    const PRESETS = { Prep: ['tracker', 'scene', 'inspector'], Running: ['scene', 'party', 'log'] };
+    const PRESETS = CFG.presets || { Prep: ['tracker', 'scene', 'inspector'], Running: ['scene', 'party', 'log'] };   // a system's own (VttConfig.presets)
     wc.appendChild(el('div', { class: 'chiprow presets' }, Object.keys(PRESETS).map((name) => el('button', { class: 'btn ghost tiny', type: 'button', title: PRESETS[name].map((id) => Panels.PANELS[id] ? Panels.PANELS[id].label : id).join(' · '), onclick: () => { const s = slots(); PRESETS[name].forEach((id, i) => (s[i] = id)); State.ui('slots', s); single = PRESETS[name][0]; render(); } }, [name]))));
     window.VttBus.on('history', syncHistory);
     syncHistory();
@@ -282,7 +282,7 @@
   // text, enter, leave }) — a courtesy to a player who opens /gm/ on the public site, not access
   // control. Passed once per tab (sessionStorage); "leave" goes back to the site.
   const gate = CFG.gmGate;
-  if (CFG.title) document.title = CFG.title + ' — the GM’s table';
+  if (CFG.title) document.title = CFG.title + ' — the ' + (CFG.roleName || 'GM') + '’s table';
   const GATE_KEY = (CFG.storagePrefix || 'sortilege-vtt') + ':gm-gate';
   let passed = !gate;
   try { passed = passed || sessionStorage.getItem(GATE_KEY) === '1'; } catch (e) { /* storage off: ask every load */ }

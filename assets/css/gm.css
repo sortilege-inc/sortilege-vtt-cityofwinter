@@ -1,0 +1,50 @@
+/* engine/gm.css — the GM's own material (engine/gm-text.js, engine/gm-panes.js) and the gate in front
+   of the GM page (engine/app.js). Ported from sortilege-vtt-l5r5e (I19); it reads the system's
+   colours where it has them (--edge, --ink-2, --crimson, --jade, --gold) and falls back otherwise. */
+.gm-text p { margin: 6px 0; line-height: 1.5; }
+.gm-text ul { margin: 4px 0 6px 18px; padding: 0; }
+.gm-text blockquote { margin: 6px 0 6px 6px; padding-left: 10px; border-left: 2px solid var(--edge, rgba(0,0,0,.2)); opacity: .9; }
+.gm-text code { font-size: .85em; }
+.gm-tag { font-size: .72rem; font-weight: 600; letter-spacing: .06em; padding: 1px 6px; border-radius: 3px; white-space: nowrap; margin-right: 2px; }
+.gm-tag-set, .gm-tag-agreed { background: #2f6b3f; color: #eafcef; }
+.gm-tag-source { background: #3a5a8e; color: #eaf1fc; }
+.gm-tag-yours { background: #8a5a1e; color: #fdf0d9; }
+.gm-tag-open { background: #8e2f3a; color: #ffe9ec; }
+.gm-tag-mine { background: #5a4a6e; color: #f0eafc; }
+.gm-tag-note { background: #6e5f48; color: #f5ece0; }
+.gm-sec { border-left: 3px solid var(--edge, rgba(0,0,0,.2)); padding: 2px 0 4px 10px; margin: 8px 0; }
+.gm-sec.editing { border-left-color: var(--gold, #9a7b3f); }
+.gm-sec.editing > input.text { width: 100%; margin-bottom: 6px; }
+.gm-sec-h { display: flex; align-items: center; gap: 8px; }
+.gm-fold { background: none; border: 0; padding: 2px 0; font: inherit; font-weight: 600; font-size: 1.02em; color: inherit; cursor: pointer; text-align: left; flex: 1; }
+.gm-caret { display: inline-block; width: 1em; opacity: .6; }
+.gm-sub { margin: 4px 0 4px 2px; }
+.gm-sub > summary { cursor: pointer; font-weight: 600; padding: 2px 0; }
+.gm-sub > .gm-text { padding-left: 14px; }
+.gm-sec-actions { margin-top: 6px; }
+.gm-about { margin-top: 4px; }
+.gm-edit { width: 100%; font: inherit; line-height: 1.45; }
+.gm-sub-edit { margin: 6px 0 6px 12px; }
+.gm-add { margin-top: 8px; }
+.gm-note { margin: 4px 0 8px; }
+.gm-hit { margin: 6px 0; }
+.gm-flash { outline: 2px solid var(--gold, #c2a25c); outline-offset: 2px; }
+.arc-session { display: block; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--edge, rgba(0,0,0,.15)); padding: 8px 0 4px; margin-top: 8px; font: inherit; font-weight: 600; font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; color: inherit; cursor: pointer; }
+.arc-session.played { opacity: .6; }
+.arc-card.played { border-left-color: var(--jade, #4f7d5c); }
+.arc-card.played .gm-fold { opacity: .7; }
+.arc-summary { font-style: italic; margin: 4px 0; opacity: .85; }
+.gm-questions { list-style: none; margin: 4px 0; padding: 0; }
+.gm-questions li { display: flex; gap: 8px; align-items: baseline; padding: 3px 0; }
+.gm-questions li .gm-q { flex: 1; }
+.gm-questions li.asked .gm-q { opacity: .55; text-decoration: line-through; }
+.thread { border-left-color: var(--crimson, #b62432); }
+.thread.closed { border-left-color: var(--edge, rgba(0,0,0,.2)); opacity: .6; }
+.thread-notes { margin-top: 6px; }
+.notes-free { width: 100%; }
+.gm-veil { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: #17120d; padding: 16px; }
+.gm-veil-box { max-width: 460px; text-align: center; padding: 22px 20px; background: var(--paper, #efe6d2); color: var(--ink, #2a2016); border-radius: 6px; }
+.gm-veil-title { font-weight: 600; font-size: 1.4em; margin-bottom: 8px; }
+.gm-veil .chiprow { justify-content: center; display: flex; gap: 8px; }
+body.gated #main, body.gated #nav { visibility: hidden; }
+.site-closed { max-width: 560px; margin: 48px auto; padding: 0 16px; text-align: center; }

@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "vtt-cityofwinter", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "8761"], "port": 8761 },
+    { "name": "vtt-cityofwinter-worker", "runtimeExecutable": "npx", "runtimeArgs": ["wrangler", "dev", "--port", "8810"], "port": 8810, "cwd": "worker" }
+  ]
+}

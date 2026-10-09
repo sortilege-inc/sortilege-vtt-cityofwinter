@@ -1,0 +1,12 @@
+{
+  "name": "sortilege-vtt-cityofwinter-worker",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --port 8787",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0",
+    "typescript": "^5.5.0"
+  }
+}

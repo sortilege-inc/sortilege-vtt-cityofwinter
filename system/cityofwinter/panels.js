@@ -325,14 +325,15 @@ window.CowPanels = (function () {
   function swatches(st, c, after) {
     return el('div', { class: 'swatches' }, TOKENS.map((t) => {
       const taken = st.characters.find((x) => x.token === t.id && x.id !== c.id);
-      return el('button', { type: 'button', class: `swatch ${c.token === t.id ? 'on' : ''}`.trim(), style: `--tok:${t.color}`, title: taken ? `${t.name} — ${taken.name}’s` : t.name, 'aria-label': `${t.name} token`, 'aria-pressed': String(c.token === t.id), disabled: !!taken,
-        onclick: () => { commit('setToken', { id: c.id, token: t.id }); if (after) after(); } });
+      const art = UI.tokenArt(t.id);
+      return el('button', { type: 'button', class: `swatch ${art ? 'pic' : ''} ${c.token === t.id ? 'on' : ''}`.trim(), style: `--tok:${t.color}`, title: taken ? `${t.name} — ${taken.name}’s` : t.name, 'aria-label': `${t.name} token`, 'aria-pressed': String(c.token === t.id), disabled: !!taken,
+        onclick: () => { commit('setToken', { id: c.id, token: t.id }); if (after) after(); } }, art ? el('img', { src: art, alt: '' }) : null);
     }));
   }
 
   function setupTokens(st, step) {
     return el('div', {}, instr(step.instruction), teachFold(step.teaching),
-      el('p', { class: 'small muted', text: 'The boxed Tokens are picture discs; here each character wears a colour and their initial.' }),
+      el('p', { class: 'small muted', text: 'The ten discs from the box. A character without one shows their initial.' }),
       el('div', { class: 'tokengrid' }, st.characters.map((c) => el('div', { class: 'tokenrow' }, who(c), swatches(st, c)))),
       setupNav(st, { next: 'Introduce the Umbra' }));
   }

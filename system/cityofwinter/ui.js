@@ -106,8 +106,13 @@ window.CowUI = (function () {
     if (ch && ch.isMemory) return el('span', { class: `token ${opts.size || ''} memorytok`.trim(), title: `${ch.name} · a Memory`, 'aria-hidden': 'true', text: '☾' });
     const t = tokens.find((x) => x.id === (ch && ch.token)) || { color: 'var(--chalk-faint)', name: '' };
     const initial = ((ch && ch.name) || '?').trim().charAt(0).toUpperCase();
-    return el('span', { class: `token ${opts.size || ''}`.trim(), style: `--tok:${t.color}`, title: opts.title !== undefined ? opts.title : `${(ch && ch.name) || ''}${t.name ? ` · ${t.name} token` : ''}`, 'aria-hidden': 'true', text: initial });
+    const art = tokenArt(t.id);
+    const title = opts.title !== undefined ? opts.title : `${(ch && ch.name) || ''}${t.name ? ` · ${t.name} token` : ''}`;
+    if (art) return el('span', { class: `token pic ${opts.size || ''}`.trim(), style: `--tok:${t.color}`, title, 'aria-hidden': 'true' }, el('img', { src: art, alt: '' }));
+    return el('span', { class: `token ${opts.size || ''}`.trim(), style: `--tok:${t.color}`, title, 'aria-hidden': 'true', text: initial });
   }
+  /** The disc's picture, when this deployment has it (VttConfig.tokenArt — the library). */
+  const tokenArt = (id) => ((window.VttConfig || {}).tokenArt || {})[id] || null;
 
   /** The book's own words, laid out: blank lines are paragraphs, "- " lines a list. Nothing is reworded. */
   function ruleText(text, opts) {
@@ -197,5 +202,5 @@ window.CowUI = (function () {
     return out;
   }
 
-  return { el, add, clear, choose, modal, xcard, marksRow, shapeIcon, cardEl, tokenEl, ruleText, details, dieFace, rollDie, fmtTime, miniMarkdown };
+  return { el, add, clear, choose, modal, xcard, tokenArt, marksRow, shapeIcon, cardEl, tokenEl, ruleText, details, dieFace, rollDie, fmtTime, miniMarkdown };
 })();

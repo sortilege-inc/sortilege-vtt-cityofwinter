@@ -92,17 +92,19 @@
 
   // Tokens. The boxed game's Tokens are double-sided picture discs; the app's stand-ins are
   // colours, each worn with the character's initial.
+  // The ten boxed Tokens: picture discs — brass crowns, copper fires and bells, silver lights
+  // and pouches. The colour is the disc's metal (the ring, and the fallback when there is no art).
   const TOKENS = [
-    { id: 'frost', name: 'Frost', color: '#bcd8e6' },
-    { id: 'ember', name: 'Ember', color: '#e8912e' },
-    { id: 'rose', name: 'Rose', color: '#f48cbe' },
-    { id: 'moss', name: 'Moss', color: '#9fbf7a' },
-    { id: 'gold', name: 'Gold', color: '#edc76a' },
-    { id: 'dusk', name: 'Dusk', color: '#a99be0' },
-    { id: 'rust', name: 'Rust', color: '#c1703c' },
-    { id: 'sea', name: 'Sea', color: '#5fb3b0' },
-    { id: 'ash', name: 'Ash', color: '#b9b7b4' },
-    { id: 'wine', name: 'Wine', color: '#c0455a' },
+    { id: 'crown-a', name: 'Crown · garland', color: '#c9a85a' },
+    { id: 'crown-b', name: 'Crown · diadem', color: '#c9a85a' },
+    { id: 'fire-a', name: 'Fire · cauldron', color: '#b8744a' },
+    { id: 'fire-b', name: 'Fire · anvil', color: '#b8744a' },
+    { id: 'bell-a', name: 'Bell · hung', color: '#b8744a' },
+    { id: 'bell-b', name: 'Bell · on a cord', color: '#b8744a' },
+    { id: 'light-a', name: 'Light · moon', color: '#b9b7b4' },
+    { id: 'light-b', name: 'Light · lantern', color: '#b9b7b4' },
+    { id: 'pouch-a', name: 'Pouch · harvest', color: '#b9b7b4' },
+    { id: 'pouch-b', name: 'Pouch · coins', color: '#b9b7b4' },
   ];
 
   function newCharacter({ id, name, pronouns, marks = 0, token = '', templateId = null }) {

@@ -97,7 +97,7 @@ window.VttSystem = (function () {
   const placeTokens = () => ({ mapId: 'table', added: 0 });
   const portrait = () => null;
   function tokenSources() {
-    const party = (S().party || []).map((m) => ({ id: 'tk-' + m.id, label: m.name, kind: 'party', owner: m.id, ref: m.id, color: (R.TOKENS.find((t) => t.id === m.token) || {}).color }));
+    const party = (S().party || []).map((m) => ({ id: 'tk-' + m.id, label: m.name, kind: 'party', owner: m.id, ref: m.id, color: (R.TOKENS.find((t) => t.id === m.token) || {}).color, image: ((window.VttConfig || {}).tokenArt || {})[m.token] || null }));
     const groups = [];
     if (party.length) groups.push({ label: 'The family', items: party });
     groups.push({ label: 'Anyone else', items: [{ label: 'Someone (name them)', kind: 'cast', image: 'assets/tokens/npc.svg', named: true }] });

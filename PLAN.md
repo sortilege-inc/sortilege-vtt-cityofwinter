@@ -52,6 +52,8 @@ starts one); nothing is lost — `DEFAULT off` keeps its value — and the syste
 16. **The facilitator's page holds the room socket** (the family's design: one window per browser). Opening the table or the player view from it is a second window; navigating the facilitator's page away drops the socket and, on return, it takes the room's snapshot. Unchanged — noted because the proof first ran the wrong way round.
 17. **The player's "add yourself" is a system hook.** `engine/play.js` renders `VttSystem.joinForm(session)` on the claim screen when the system defines it, and then hides the character-file loader (no creator here). Default: nothing — a sibling is unchanged.
 
+18. **The Tokens are the publisher's discs.** The box's ten picture Tokens (crown, fire, bell, light, pouch — two each) are the family's Tokens: `CowRules.TOKENS` now carries those ten ids with the disc's metal as its colour; the pictures are **not in the repo** (the art is the publisher's) — they were uploaded to this deployment's library (2026-10-09, with the five maps: River Scroll p1–p3, City Map high-res, The Wandering Borough) and `VttConfig.tokenArt` maps id → library URL. A character whose token has no art shows their initial on the colour, so a pack from before this change still draws; pick a disc from the character menu. The map page's party tokens carry the same image.
+
 ## Milestones
 
 | # | Milestone | Proof |

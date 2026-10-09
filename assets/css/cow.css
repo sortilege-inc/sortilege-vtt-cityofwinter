@@ -1058,3 +1058,11 @@ details.readon .rtext.teach{ border-left:none; padding-left:0; margin:0.2rem 0 0
 .segmented.presets{ border-color:var(--edge); }
 .segmented.presets .btn{ border-right-color:var(--edge); }
 .segmented.presets .btn.on{ background:var(--slate); color:var(--ice); }
+
+/* the boxed Tokens: picture discs (VttConfig.tokenArt) */
+.token.pic{ background:#0d0d12; overflow:hidden; }
+.token.pic img{ width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; }
+.swatch.pic{ width:2.6rem; height:2.6rem; padding:0; overflow:hidden; background:#0d0d12; }
+.swatch.pic img{ width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; }
+.swatch.pic.on{ box-shadow:0 0 0 2px var(--gold-lit), 0 0 0 4px rgba(10,10,12,0.9); }
+.swatch.pic[disabled]{ opacity:0.3; filter:grayscale(1); }

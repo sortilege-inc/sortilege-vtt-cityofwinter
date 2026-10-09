@@ -26,6 +26,21 @@ window.VttConfig = {
   // the map library on the Worker (engine/library.js): the facilitator uploads maps to a live
   // instance; none ship in the repo (PLAN.md, D4)
   library: true,
+  // The family's Tokens: the publisher's ten picture discs, uploaded to this deployment's library
+  // (not in the repo — the art is the publisher's). Ids match CowRules.TOKENS; a token without art
+  // shows the character's initial on its colour.
+  tokenArt: {
+    'crown-a': 'https://sortilege-vtt-cityofwinter.sortilege.workers.dev/library/mv1558oz-qzy3z3-crown-a.png',
+    'crown-b': 'https://sortilege-vtt-cityofwinter.sortilege.workers.dev/library/mv1559h7-7wh2g8-crown-b.png',
+    'fire-a': 'https://sortilege-vtt-cityofwinter.sortilege.workers.dev/library/mv155a5a-8q9g5k-fire-a.png',
+    'fire-b': 'https://sortilege-vtt-cityofwinter.sortilege.workers.dev/library/mv155aur-z8kn6g-fire-b.png',
+    'bell-a': 'https://sortilege-vtt-cityofwinter.sortilege.workers.dev/library/mv155bkh-4p32zu-bell-a.png',
+    'bell-b': 'https://sortilege-vtt-cityofwinter.sortilege.workers.dev/library/mv155cc9-dy3hpp-bell-b.png',
+    'light-a': 'https://sortilege-vtt-cityofwinter.sortilege.workers.dev/library/mv155d4k-s7uebw-light-a.png',
+    'light-b': 'https://sortilege-vtt-cityofwinter.sortilege.workers.dev/library/mv155dr6-t2jqyr-light-b.png',
+    'pouch-a': 'https://sortilege-vtt-cityofwinter.sortilege.workers.dev/library/mv155ejp-dvr36x-pouch-a.png',
+    'pouch-b': 'https://sortilege-vtt-cityofwinter.sortilege.workers.dev/library/mv155f85-3q8uxw-pouch-b.png',
+  },
   // The Worker that holds the rooms (M4). Served from localhost the app talks to `wrangler dev`;
   // deployed, to the URL below. Empty = sessions disabled.
   worker: {

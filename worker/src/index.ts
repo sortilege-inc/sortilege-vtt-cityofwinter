@@ -287,7 +287,17 @@ export class SessionRoom extends DurableObject<Env> {
       case 'event': {
         const gmOnly = ['select', 'scene:changed'];
         if (att.role !== 'gm' && gmOnly.indexOf(msg.name) !== -1) return;
-        if (['roll', 'ping', 'select', 'scene:changed', 'arm'].indexOf(msg.name) === -1) return;
+        if (['roll', 'ping', 'select', 'scene:changed', 'arm', 'card'].indexOf(msg.name) === -1) return;
+        if (msg.name === 'card') {
+          // a safety card: anonymous to the other players; the GM's copy names the seat that raised it
+          const color = msg.payload && msg.payload.color;
+          if (!color) return;
+          const doc = this.get('doc');
+          const member = att.memberId && doc ? (doc.party || []).find((x: any) => x.id === att.memberId) : null;
+          const name = member ? member.name : (att.role === 'gm' ? 'the GM' : null);
+          this.broadcast((a) => ({ type: 'event', name: 'card', payload: a.role === 'gm' ? { color, memberId: att.memberId, name } : { color } }), ws);
+          return;
+        }
         this.broadcast(() => ({ type: 'event', name: msg.name, payload: msg.payload }), ws);
         return;
       }

@@ -16,7 +16,7 @@ window.VttSession = (function () {
   const State = window.VttState;
   const Bus = window.VttBus;
   const Ops = window.VttOps;
-  const EVENTS = ['roll', 'ping', 'select', 'scene:changed', 'arm'];   // arm: a modifier for other sheets' next roll (an ability for every player)
+  const EVENTS = ['roll', 'ping', 'select', 'scene:changed', 'arm', 'card'];   // arm: a modifier for other sheets' next roll (an ability for every player)
 
   let info = load();       // { role, code, token, memberId, base, campaign }
   let ws = null;

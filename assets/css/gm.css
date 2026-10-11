@@ -48,3 +48,19 @@
 .gm-veil .chiprow { justify-content: center; display: flex; gap: 8px; }
 body.gated #main, body.gated #nav { visibility: hidden; }
 .site-closed { max-width: 560px; margin: 48px auto; padding: 0 16px; text-align: center; }
+
+/* ported from sortilege-vtt-teeth (2026-10-10): safety cards */
+/* safety cards: three tabs tucked bottom right that rise on hover; the raised card over everything */
+.safety-dock { position: fixed; right: 0.8rem; bottom: 0; z-index: 40; display: flex; gap: 0.3rem; align-items: flex-end; }
+.safety-tab { width: 3.2rem; height: 4.4rem; border: 2px solid #1a1613; border-bottom: 0; border-radius: 6px 6px 0 0; font-family: var(--sc); font-size: 0.7rem; letter-spacing: 0.06em; cursor: pointer; transform: translateY(62%); transition: transform 0.15s ease; box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3); color: #1a1613; padding-top: 0.3rem; text-align: center; vertical-align: top; }
+.safety-tab:hover, .safety-tab:focus-visible { transform: translateY(8%); }
+.safety-green { background: #4f8a3a; color: #fff; }
+.safety-yellow { background: #e8c431; color: #1a1613; }
+.safety-red { background: #b5343a; color: #fff; }
+.safety-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(26, 22, 19, 0.55); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.safety-card { width: min(320px, 80vw); aspect-ratio: 5 / 7; border: 3px solid #1a1613; border-radius: 14px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6rem; text-align: center; padding: 1rem; }
+.safety-card-label { font-family: var(--display); font-size: 2.2rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.safety-card-meaning { font-family: var(--serif); font-size: 1.05rem; }
+.safety-who { font-family: var(--sc); letter-spacing: 0.06em; font-size: 0.85rem; margin-top: 0.6rem; padding: 0.2rem 0.6rem; background: rgba(255, 255, 255, 0.85); color: #1a1613; border-radius: 4px; }
+.safety-card-hint { font-size: 0.75rem; opacity: 0.75; margin-top: auto; }
+@media (max-width: 600px) { .safety-tab { width: 2.6rem; height: 3.6rem; font-size: 0.6rem; } }

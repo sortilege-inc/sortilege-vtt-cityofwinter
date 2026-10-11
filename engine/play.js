@@ -234,6 +234,17 @@
     seatPending();     // a character loaded before joining takes its seat once the room is online
     render();
   });
+  // the safety cards sit at the bottom right while the player is seated
+  function syncCards() {
+    const s = Session.current();
+    const me = s.active && s.info.memberId ? (State.state.party || []).find((x) => x.id === s.info.memberId) : null;
+    if (me && window.VttCards) window.VttCards.dock(() => ({ memberId: me.id, name: me.name }));
+    else if (window.VttCards) window.VttCards.undock();
+  }
+  Session.onChange(syncCards);
+  Bus.on('state:changed', syncCards);
+  Bus.on('state:remote', syncCards);
+  syncCards();
   Bus.on('state:remote', () => render());
   Bus.on('state:changed', () => render());
   Bus.on('session:error', (p) => {
